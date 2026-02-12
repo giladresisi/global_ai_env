@@ -145,6 +145,7 @@ When designing the approach:
 1. **Default to mimicking existing similar features** unless there's a clear reason to diverge
 2. **Document why** if you're diverging from existing patterns
 3. **Prefer consistency over novelty** - reuse existing architectural patterns
+4. **Design for parallel execution** - identify which tasks are independent
 
 Determine:
 - Files to create vs modify (follow existing structure)
@@ -154,6 +155,9 @@ Determine:
 - API contracts (consistent with existing endpoints)
 - Testing strategy (same approach as similar features)
 - Error scenarios and edge cases
+- **Parallelization opportunities** - which tasks have no dependencies
+- **Interface contracts** - what parallel tasks need from each other
+- **Integration points** - where parallel work must synchronize
 
 **Red Flags** (warrant asking user for clarification):
 - Introducing new architectural patterns not used elsewhere
@@ -359,11 +363,161 @@ For each external API:
 
 ---
 
+## PARALLEL EXECUTION STRATEGY
+
+### Dependency Graph
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ FOUNDATION LAYER (Phase 1) - Can run in parallel           │
+├─────────────────────────────────────────────────────────────┤
+│ Task 1.1: [Name]  │ Task 1.2: [Name]  │ Task 1.3: [Name] │
+│ Agent: [Role]     │ Agent: [Role]     │ Agent: [Role]    │
+│ Deps: None        │ Deps: None        │ Deps: None       │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│ CORE LAYER (Phase 2) - After Foundation                     │
+├─────────────────────────────────────────────────────────────┤
+│ Task 2.1: [Name]  │ Task 2.2: [Name]  │                   │
+│ Agent: [Role]     │ Agent: [Role]     │                   │
+│ Deps: 1.1, 1.2    │ Deps: 1.3         │                   │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│ INTEGRATION LAYER (Phase 3) - After Core                    │
+├─────────────────────────────────────────────────────────────┤
+│ Task 3.1: [Name]                                            │
+│ Agent: [Role]                                               │
+│ Deps: 2.1, 2.2                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Parallelization Opportunities
+
+**Wave 1 - Fully Parallel** (No dependencies):
+- Task [X]: [Description] → Agent: [Role]
+- Task [Y]: [Description] → Agent: [Role]
+- Task [Z]: [Description] → Agent: [Role]
+
+**Wave 2 - Parallel after Wave 1**:
+- Task [A]: [Description] → Agent: [Role] → Needs: [Task X]
+- Task [B]: [Description] → Agent: [Role] → Needs: [Task Y, Z]
+
+**Wave 3 - Sequential** (Requires Wave 2):
+- Task [C]: [Description] → Agent: [Role] → Needs: [Task A, B]
+
+### Team Coordination
+
+**Shared Context Location:** `.agents/plans/shared-context.md`
+
+**Interface Contracts:**
+
+#### Contract 1: [Name]
+**Provider:** Task [X] (Agent [Role])
+**Consumer:** Task [A] (Agent [Role])
+**Interface:**
+```[language]
+# Definition of what Task X delivers to Task A
+```
+**Delivery:** After Task [X] validation passes
+**Mock for Parallel Work:**
+```[language]
+# How Task A can continue while Task X is in progress
+```
+
+#### Contract 2: [Name]
+[Repeat for each dependency between parallel workstreams]
+
+### Synchronization Checkpoints
+
+**Checkpoint 1:** After Wave 1 completes
+- **Participants:** Agents working on Tasks X, Y, Z
+- **Validation:** All Wave 1 tasks pass individual validation
+- **Integration Test:**
+```bash
+# Command to verify Wave 1 tasks work together
+```
+- **Blocker Resolution:** If any Wave 1 task fails, Wave 2 cannot start
+
+**Checkpoint 2:** After Wave 2 completes
+[Repeat structure]
+
+### Shared Context Management
+
+**Location:** `.agents/plans/shared-context.md`
+
+**Purpose:** Enable parallel agents to coordinate without blocking
+
+**Structure:**
+```markdown
+# Shared Context for [Feature Name]
+
+## Global Decisions
+- [Decision 1]: [Rationale]
+- [Decision 2]: [Rationale]
+
+## Naming Conventions
+- [Convention 1]
+- [Convention 2]
+
+## Interface Registry
+| Task | Provides | File Location | Status |
+|------|----------|---------------|--------|
+| 1.1  | [API]    | path/to/file  | ✅     |
+| 1.2  | [Schema] | path/to/file  | 🚧     |
+
+## Blockers & Questions
+| Task | Question | Answer | Resolved By |
+|------|----------|--------|-------------|
+| 2.1  | [Q]      | [A]    | Agent X     |
+
+## Integration Test Results
+| Checkpoint | Status | Notes |
+|------------|--------|-------|
+| Wave 1     | ✅     | All pass |
+| Wave 2     | 🚧     | In progress |
+```
+
+**Update Protocol:**
+- Agents update status when starting/completing tasks
+- Agents post questions in Blockers section
+- Other agents answer unblocked questions
+- Integration test results posted after each checkpoint
+
+### Agent Team Roles
+
+**Backend Specialist:**
+- Tasks involving: API endpoints, business logic, database models
+- Skills: Python/Node, SQL, API design
+
+**Frontend Specialist:**
+- Tasks involving: UI components, state management, user interactions
+- Skills: React/Vue, CSS, accessibility
+
+**Test Specialist:**
+- Tasks involving: Unit tests, integration tests, E2E tests
+- Skills: Testing frameworks, test data generation
+
+**Integration Specialist:**
+- Tasks involving: System integration, deployment, configuration
+- Skills: DevOps, CI/CD, troubleshooting
+
+**Coordination:**
+- Each agent owns their tasks in the wave
+- Agents read Shared Context before starting
+- Agents update Shared Context when completing
+- Agents post blockers immediately when encountered
+
+---
+
 ## IMPLEMENTATION PLAN
 
 ### Phase 1: Foundation
 
 <Describe foundational work needed before main implementation>
+
+**Parallelization:** ✅ All tasks in this phase can run concurrently
 
 **Tasks:**
 
@@ -427,7 +581,7 @@ For each external API:
 
 ## STEP-BY-STEP TASKS
 
-IMPORTANT: Execute every task in order, top to bottom. Each task is atomic and independently testable.
+IMPORTANT: Tasks are organized by execution waves for parallel execution. Tasks within the same wave can be executed concurrently by different agents.
 
 ### Task Format Guidelines
 
@@ -440,15 +594,116 @@ Use information-dense keywords for clarity:
 - **REFACTOR**: Restructure without changing behavior
 - **MIRROR**: Copy pattern from elsewhere in codebase
 
-### {ACTION} {target_file}
+### Task Metadata Format
 
+Each task includes:
+- **WAVE**: Execution wave number (tasks in same wave = parallel)
+- **AGENT_ROLE**: Suggested agent specialization
+- **DEPENDS_ON**: Task IDs that must complete first (empty = no deps)
+- **BLOCKS**: Task IDs that wait for this task
+- **PROVIDES**: What this task delivers for downstream tasks
+- **INTEGRATION_TEST**: How to verify this integrates with parallel tasks
+
+---
+
+### WAVE 1: Foundation Layer (Fully Parallel)
+
+#### Task 1.1: {ACTION} {target_file}
+
+- **WAVE**: 1
+- **AGENT_ROLE**: [backend/frontend/test/infra]
+- **DEPENDS_ON**: []
+- **BLOCKS**: [Task IDs that need this]
+- **PROVIDES**: [Interface/contract for downstream tasks]
 - **IMPLEMENT**: {Specific implementation detail}
 - **PATTERN**: {Reference to existing pattern - file:line}
 - **IMPORTS**: {Required imports and dependencies}
 - **GOTCHA**: {Known issues or constraints to avoid}
 - **VALIDATE**: `{executable validation command}`
+- **INTEGRATION_TEST**: `{command to test with other Wave 1 tasks}`
 
-<Continue with all tasks in dependency order...>
+#### Task 1.2: {ACTION} {target_file}
+
+- **WAVE**: 1
+- **AGENT_ROLE**: [role]
+- **DEPENDS_ON**: []
+- **BLOCKS**: [Task IDs]
+- **PROVIDES**: [What it delivers]
+- **IMPLEMENT**: {Details}
+- **PATTERN**: {Reference}
+- **VALIDATE**: `{command}`
+- **INTEGRATION_TEST**: `{command}`
+
+#### Task 1.3: {ACTION} {target_file}
+
+[Repeat format for all Wave 1 tasks]
+
+**Wave 1 Integration Checkpoint:**
+```bash
+# Run after ALL Wave 1 tasks complete
+# Verifies that all parallel tasks integrate correctly
+[integration test command]
+```
+
+---
+
+### WAVE 2: Core Layer (Parallel after Wave 1)
+
+**Prerequisites:** All Wave 1 tasks must pass validation and integration tests
+
+#### Task 2.1: {ACTION} {target_file}
+
+- **WAVE**: 2
+- **AGENT_ROLE**: [role]
+- **DEPENDS_ON**: [Task 1.1, Task 1.2]
+- **BLOCKS**: [Task IDs]
+- **PROVIDES**: [What it delivers]
+- **IMPLEMENT**: {Details}
+- **PATTERN**: {Reference}
+- **USES_FROM_WAVE_1**: Task 1.1 provides [X], Task 1.2 provides [Y]
+- **VALIDATE**: `{command}`
+- **INTEGRATION_TEST**: `{command with Wave 2 peers}`
+
+#### Task 2.2: {ACTION} {target_file}
+
+- **WAVE**: 2
+- **AGENT_ROLE**: [role]
+- **DEPENDS_ON**: [Task 1.3]
+- **BLOCKS**: [Task IDs]
+- **PROVIDES**: [What it delivers]
+- **IMPLEMENT**: {Details}
+- **VALIDATE**: `{command}`
+
+**Wave 2 Integration Checkpoint:**
+```bash
+# Run after ALL Wave 2 tasks complete
+[integration test command]
+```
+
+---
+
+### WAVE 3: Integration Layer (Sequential)
+
+**Prerequisites:** All Wave 2 tasks complete
+
+#### Task 3.1: {ACTION} {target_file}
+
+- **WAVE**: 3
+- **AGENT_ROLE**: [integration-specialist]
+- **DEPENDS_ON**: [Task 2.1, Task 2.2]
+- **BLOCKS**: []
+- **PROVIDES**: [Final integrated feature]
+- **IMPLEMENT**: {Integration logic}
+- **VALIDATE**: `{command}`
+- **INTEGRATION_TEST**: `{end-to-end test}`
+
+**Final Integration Checkpoint:**
+```bash
+# Verifies entire feature works end-to-end
+[full feature test command]
+```
+
+<Continue with additional tasks organized by wave...>
 
 ---
 
@@ -634,6 +889,12 @@ wc -l .agents/plans/[feature-name].md
 - [ ] Tasks are in dependency order
 - [ ] Another agent could execute without conversation context
 - [ ] All patterns reference specific file:line numbers
+- [ ] **Tasks organized into parallel execution waves**
+- [ ] **Each task has WAVE, DEPENDS_ON, and AGENT_ROLE metadata**
+- [ ] **Interface contracts defined between dependent tasks**
+- [ ] **Integration checkpoints specified for each wave**
+- [ ] **Shared context structure documented**
+- [ ] **At least 30% of tasks can execute in parallel** (or explain why not)
 
 ---
 
@@ -653,6 +914,17 @@ wc -l .agents/plans/[feature-name].md
 - [ ] Tasks ordered by dependency (can execute top-to-bottom)
 - [ ] Each task is atomic and independently testable
 - [ ] Pattern references include specific file:line numbers
+
+### Parallel Execution Ready ✓
+
+- [ ] Tasks organized into execution waves
+- [ ] Dependencies between tasks explicitly documented
+- [ ] Interface contracts defined for cross-task communication
+- [ ] Synchronization checkpoints identified
+- [ ] Shared context structure documented
+- [ ] Agent role assignments suggested
+- [ ] Mock strategies provided for blocked parallel work
+- [ ] Integration tests defined for each wave
 
 ### Pattern Consistency ✓
 
@@ -700,14 +972,21 @@ After creating the plan, output this report to the user and STOP (do not execute
 📝 Summary:
 [2-3 sentence summary of feature and approach]
 
+⚡ Parallel Execution:
+- Waves: [Number] execution waves
+- Parallelization: [Number] tasks can run concurrently
+- Max Speedup: [X]x with [N] parallel agents
+- Sequential Tasks: [Number] must run sequentially
+
 ⚠️  Key Risks:
 [List 2-4 key risks with mitigations]
 
 🔍 Similar Features Found:
 [List similar features that were used as patterns, or "None - new pattern"]
 
-📊 Estimated Tasks: [Number]
+📊 Estimated Tasks: [Number] total ([X] parallel, [Y] sequential)
 🎯 Confidence Score: [X]/10 for one-pass success
+👥 Recommended Team Size: [Number] agents for optimal parallelization
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

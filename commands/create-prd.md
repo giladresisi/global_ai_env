@@ -113,7 +113,14 @@ For each template section:
 - [ ] In-scope features for MVP
 - [ ] Explicit out-of-scope items
 - [ ] User stories with examples
-- [ ] Implementation phases
+- [ ] Implementation phases with parallelization strategy
+
+**Parallel Execution Design**:
+- [ ] Workstream boundaries identified
+- [ ] Interface contracts between teams defined
+- [ ] Shared context and dependencies mapped
+- [ ] Integration checkpoints planned
+- [ ] Mock/stub strategies for blocked work
 
 **Risk Management**:
 - [ ] 3-5 key risks identified
@@ -127,6 +134,13 @@ For each template section:
 **APIs/Services**: Endpoints? Request/response formats? Rate limiting? Versioning?
 **Libraries**: Public API surface? Installation? Usage examples? Dependencies?
 **Universal**: Error handling? Logging? Tests (unit/integration/e2e)? Documentation?
+
+**Parallel Execution Planning**:
+- Can frontend and backend be built concurrently?
+- What shared interfaces/contracts need to be defined first?
+- Which components have no dependencies and can start immediately?
+- What mock/stub strategies enable parallel development?
+- Where are the integration points that require synchronization?
 
 ---
 
@@ -306,6 +320,101 @@ Categories: Backend / Frontend / Database / Infrastructure / Testing
 
 ---
 
+### `## Parallel Execution Architecture`
+
+**Req**: Yes | **Format**: H2 with H3 subsections
+
+**Purpose**: Enable independent team/agent workstreams to execute concurrently
+
+```markdown
+## Parallel Execution Architecture
+
+### Team Structure
+
+**Workstream Teams:**
+- **Team A - [Name]**: [Responsibility scope]
+  - Focus: [What they build]
+  - Expertise: [Required skills]
+  - Works with: [Other teams they depend on]
+
+- **Team B - [Name]**: [Responsibility scope]
+  - Focus: [What they build]
+  - Expertise: [Required skills]
+  - Works with: [Other teams]
+
+### Interface Contracts
+
+**CRITICAL**: These contracts enable parallel development
+
+#### Contract 1: [Name] (Team A → Team B)
+
+**Provider:** Team A
+**Consumer:** Team B
+
+**Interface Definition:**
+```[language]
+# API endpoint, data schema, or contract definition
+```
+
+**Delivery Timeline:** [When available for consumption]
+**Mock Strategy:** [How Team B can work before Team A completes]
+
+#### Contract 2: [Name]
+
+[Repeat structure for each interface]
+
+### Shared Context
+
+**What ALL teams must know:**
+- [Global architectural decision 1]
+- [Global constraint 1]
+- [Naming convention 1]
+
+**Central Configuration:**
+```[language]
+# Shared config that all teams use
+```
+
+### Synchronization Points
+
+**Integration Checkpoint 1:** [When]
+- **Participants:** Teams A, B, C
+- **Purpose:** [What gets validated]
+- **Success Criteria:** [How to verify integration works]
+
+**Integration Checkpoint 2:** [When]
+- [Repeat structure]
+
+### Dependency Graph
+
+```
+Phase 1 (Parallel)
+├── Workstream A: [Independent]
+├── Workstream B: [Independent]
+└── Workstream C: [Independent]
+    ↓
+Phase 2 (After Phase 1 completes)
+├── Workstream D: [Depends on A, B]
+└── Workstream E: [Depends on C]
+    ↓
+Phase 3 (Final Integration)
+└── Workstream F: [Depends on D, E]
+```
+
+### Risk Mitigation for Parallel Work
+
+**Risk:** [Parallel workstreams diverge or create conflicts]
+**Mitigation:**
+- [Strategy 1 - e.g., daily integration tests]
+- [Strategy 2 - e.g., shared type definitions]
+
+**Risk:** [Blocked waiting for dependencies]
+**Mitigation:**
+- [Strategy - e.g., mock implementations, contract-first development]
+```
+
+---
+
 ### `## Security & Configuration`
 
 **Req**: Yes | **Format**: H2 with H3/H4 subsections
@@ -437,17 +546,58 @@ Categories: Backend / Frontend / Database / Infrastructure / Testing
 
 **Req**: Yes | **Format**: H2 with H3 per phase
 
+**CRITICAL FOR PARALLEL EXECUTION**: Each phase must include:
+- **Parallelization Strategy**: Which workstreams can run concurrently
+- **Team Assignments**: Suggested agent roles for each workstream
+- **Dependencies**: What must complete before this phase starts
+- **Integration Points**: Where parallel work synchronizes
+- **Handoff Artifacts**: What each workstream delivers to others
+
 ```markdown
 ### Phase N: [Name] ([Period])
 
 **Goal:** [One sentence]
 
+**Parallelization Strategy:**
+- **Concurrent Workstreams**: [Number] independent workstreams
+- **Can Start After**: Phase [X] completes (or "Day 1" if no dependencies)
+
+**Workstreams:**
+
+#### Workstream A: [Name]
+**Assigned To:** [Agent role - e.g., backend-specialist, frontend-specialist, test-specialist]
+**Dependencies:** [None / Workstream X from Phase Y]
 **Deliverables:**
 - [Item 1]
+- [Item 2]
+
+**Integration Points:**
+- **Provides to Workstream B**: [API contract, data schema, etc.]
+- **Receives from Workstream C**: [Configuration, endpoints, etc.]
 
 **Validation:**
 ```bash
-# Commands or actions to verify completion
+# Commands to verify this workstream's completion
+```
+
+#### Workstream B: [Name]
+**Assigned To:** [Agent role]
+**Dependencies:** [Workstream dependencies]
+**Deliverables:**
+- [Item 1]
+
+**Integration Points:**
+- **Provides to**: [What it delivers]
+- **Receives from**: [What it needs]
+
+**Validation:**
+```bash
+# Commands to verify completion
+```
+
+**Phase Integration Test:**
+```bash
+# Commands to verify all workstreams integrate correctly
 ```
 ```
 
@@ -506,11 +656,16 @@ Categories: Backend / Frontend / Database / Infrastructure / Testing
 - [ ] APIs documented (if applicable)
 - [ ] Phases are specific
 - [ ] Risks have mitigations
+- [ ] Parallel execution architecture defined
+- [ ] Workstreams identified with clear boundaries
+- [ ] Interface contracts specified
 
 **Consistency**:
 - [ ] Terminology consistent
 - [ ] Tech choices align with architecture
 - [ ] User stories support MVP scope
+- [ ] Workstream boundaries align with architecture
+- [ ] Interface contracts match tech stack capabilities
 
 **Quality**:
 - [ ] Executive summary concise
@@ -518,6 +673,8 @@ Categories: Backend / Frontend / Database / Infrastructure / Testing
 - [ ] Code examples valid
 - [ ] No empty sections without user approval
 - [ ] API research complete (if applicable)
+- [ ] Parallelization strategy maximizes team efficiency
+- [ ] Integration checkpoints are testable and measurable
 
 ---
 
