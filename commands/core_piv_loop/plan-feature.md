@@ -1,8 +1,20 @@
 ---
 description: "Create comprehensive feature plan with deep codebase analysis and research"
+argument-hint: [feature-description]
 ---
 
 # Plan a new task
+
+## ⚠️ CRITICAL INSTRUCTIONS
+
+**DO NOT EXECUTE THE PLAN AFTER CREATING IT**
+
+This command creates a plan file only. After the plan is created:
+1. Show the user where the plan was saved
+2. Tell them to run `/core_piv_loop:execute .agents/plans/[feature-name].md` to implement it
+3. STOP - do not proceed with implementation
+
+---
 
 ## Feature: $ARGUMENTS
 
@@ -35,6 +47,47 @@ So that <benefit/value>
 ```
 
 ### Phase 2: Codebase Intelligence Gathering
+
+**CRITICAL: Check for Similar Features First**
+
+Before designing a new implementation approach, search for features that are similar to what's being requested:
+
+**If you find a similar existing feature:**
+1. **STOP and ask the user**: "I found [existing feature] which is similar to [requested feature]. Should I implement [requested feature] using the same approach as [existing feature], or do you want a different implementation strategy?"
+2. **Wait for user confirmation** before proceeding with the plan
+3. **Document the existing feature's approach** as the baseline pattern to follow
+
+**Common Similar Feature Patterns:**
+- Adding a new integration (e.g., "Add Stripe") → Check how existing integrations are implemented
+- Adding a new API endpoint → Check existing endpoint implementations
+- Adding a new authentication method → Check existing auth implementations
+- Adding a new database table/model → Check existing schema patterns
+- Adding a new tool/command → Check existing tool implementations
+- Adding a new UI component → Check existing component patterns
+
+**Why This Matters:**
+- Users typically want consistency across similar features
+- Following existing patterns ensures maintainability
+- Prevents over-engineering or unnecessary architectural changes
+- Saves time by reusing proven approaches
+
+**Example:**
+```
+User: "Add Gemini model support with ability to switch between Claude and Gemini"
+
+✅ CORRECT:
+- Find how Claude is currently integrated (settings, API keys, model configuration)
+- Ask: "I see Claude is integrated via ANTHROPIC_API_KEY and llm_provider settings.
+  Should I integrate Gemini the same way (GOOGLE_API_KEY + update model selection)?
+  Or do you want a different architecture?"
+
+❌ INCORRECT:
+- Design a completely new factory pattern for model switching
+- Create complex tool-copying mechanisms
+- Implement without checking existing integration approach
+```
+
+**After User Confirms Approach:**
 
 **Use specialized agents and parallel analysis:**
 
@@ -85,6 +138,28 @@ So that <benefit/value>
 - If requirements are unclear at this point, ask the user to clarify before you continue
 - Get specific implementation preferences (libraries, approaches, patterns)
 - Resolve architectural decisions before proceeding
+
+**Design Decisions (Follow Existing Patterns):**
+
+When designing the approach:
+1. **Default to mimicking existing similar features** unless there's a clear reason to diverge
+2. **Document why** if you're diverging from existing patterns
+3. **Prefer consistency over novelty** - reuse existing architectural patterns
+
+Determine:
+- Files to create vs modify (follow existing structure)
+- Data flow and component interactions (mirror similar features)
+- Models/schemas required (match existing naming/structure)
+- Service layer components (reuse existing patterns)
+- API contracts (consistent with existing endpoints)
+- Testing strategy (same approach as similar features)
+- Error scenarios and edge cases
+
+**Red Flags** (warrant asking user for clarification):
+- Introducing new architectural patterns not used elsewhere
+- Creating new folder structures when similar features exist
+- Using different naming conventions than existing code
+- Implementing features in a completely different way than similar existing features
 
 ### Phase 3: External Research & Documentation
 
@@ -166,14 +241,15 @@ So that <benefit/value>
 
 **Create comprehensive plan with the following structure:**
 
-**IMPORTANT - Plan Length Constraint:**
-- Maximum plan length: **500-700 lines**
+**CRITICAL - Plan Length Constraint:**
+- **HARD LIMIT**: Maximum plan length: **500-700 lines**
 - Focus on essential information and actionable tasks
 - Be concise but complete - prioritize clarity over verbosity
 - If approaching the limit, consolidate similar tasks or reduce example code
 - Quality over quantity - dense, information-rich content
+- **You MUST verify line count after creation and adjust if needed**
 
-Whats below here is a template for you to fill for th4e implementation agent:
+Whats below here is a template for you to fill for the implementation agent:
 
 ```markdown
 # Feature: <feature-name>
@@ -206,6 +282,7 @@ So that <benefit/value>
 **Estimated Complexity**: [Low/Medium/High]
 **Primary Systems Affected**: [List of main components/services]
 **Dependencies**: [External libraries or services required]
+**Breaking Changes**: [Yes/No - explain if yes]
 
 ---
 
@@ -377,7 +454,7 @@ Use information-dense keywords for clarity:
 
 ## TESTING STRATEGY
 
-<Define testing approach based on project's test framework and patterns discovered in during research>
+<Define testing approach based on project's test framework and patterns discovered during research>
 
 ### Unit Tests
 
@@ -388,6 +465,41 @@ Design unit tests with fixtures and assertions following existing testing approa
 ### Integration Tests
 
 <Scope and requirements based on project standards>
+
+### Tool Registration Tests (If Applicable)
+
+**When**: Creating tools with decorators like `@agent.tool`, `@mcp.tool`, or similar registration patterns
+
+**Scope**: Tool registration, availability, and invocation
+
+**Critical Tests Required**:
+1. **Tool Registration Test**: Verify tool is registered in the tool registry
+2. **Singleton Usage Test**: Verify endpoints/services use singleton instances with tools
+3. **E2E Invocation Test**: Verify tool can be invoked through standard interfaces
+4. **Tool Availability Test**: Verify tool is accessible in all required modes
+
+**Pattern to Follow** (adapt to your framework):
+```[language]
+# Test that tool is registered
+def test_tool_is_registered():
+    """Verify tool is registered in tool registry."""
+    registry = get_tool_registry()
+    assert "[your_tool_name]" in registry.list_tools()
+
+# Test that singleton pattern is used
+def test_service_uses_singleton():
+    """Verify service uses singleton instance with tools."""
+    from app.service import service_instance, singleton_instance
+    assert service_instance is singleton_instance
+
+# Test end-to-end invocation
+def test_tool_invocation():
+    """Verify tool can be invoked through standard interface."""
+    result = invoke_tool("[your_tool_name]", {"param": "value"})
+    assert result.success
+```
+
+**Common Pitfall**: Using factory functions creates instances WITHOUT tools. Always use singleton instances for tool-enabled services.
 
 ### Edge Cases
 
@@ -491,6 +603,40 @@ For each external API:
 
 **Directory**: Create `.agents/plans/` if it doesn't exist
 
+---
+
+## POST-PLANNING VERIFICATION
+
+### Save and Verify Line Count
+
+**REQUIRED STEPS AFTER CREATING PLAN:**
+
+```bash
+mkdir -p .agents/plans
+# Plan saved to: .agents/plans/[feature-name].md
+
+# CRITICAL: Verify line count is 500-700 lines
+wc -l .agents/plans/[feature-name].md
+
+# If not in range, adjust the plan NOW before reporting to user
+```
+
+**Line Count Adjustment**:
+- If < 500 lines: Add more examples, edge cases, validation details, or expand on patterns
+- If > 700 lines: Consolidate tasks, remove redundant explanations, trim verbose sections, use more concise language
+
+**Final Checklist**:
+- [ ] Plan is 500-700 lines (VERIFY with `wc -l` - this is MANDATORY)
+- [ ] Feature name is kebab-case
+- [ ] File paths are exact and correct
+- [ ] Validation commands are copy-pasteable and executable
+- [ ] Code examples are from actual codebase (not generic)
+- [ ] Tasks are in dependency order
+- [ ] Another agent could execute without conversation context
+- [ ] All patterns reference specific file:line numbers
+
+---
+
 ## Quality Criteria
 
 ### Context Completeness ✓
@@ -520,7 +666,7 @@ For each external API:
 - [ ] No generic references (all specific and actionable)
 - [ ] URLs include section anchors when applicable
 - [ ] Task descriptions use codebase keywords
-- [ ] Validation commands are non interactive executable
+- [ ] Validation commands are non-interactive and executable
 - [ ] Plan length is 500-700 lines maximum (concise but complete)
 
 ## Success Metrics
@@ -533,12 +679,43 @@ For each external API:
 
 **Confidence Score**: #/10 that execution will succeed on first attempt
 
-## Report
+---
 
-After creating the Plan, provide:
+## FINAL REPORT
 
-- Summary of feature and approach
-- Full path to created Plan file
-- Complexity assessment
-- Key implementation risks or considerations
-- Estimated confidence score for one-pass success
+After creating the plan, output this report to the user and STOP (do not execute):
+
+```
+✅ Plan Created Successfully
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 Feature: [Feature name]
+📄 Plan Location: .agents/plans/[feature-name].md
+📏 Plan Length: [XXX] lines (target: 500-700 lines)
+⚡ Complexity: [Low/Medium/High]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 Summary:
+[2-3 sentence summary of feature and approach]
+
+⚠️  Key Risks:
+[List 2-4 key risks with mitigations]
+
+🔍 Similar Features Found:
+[List similar features that were used as patterns, or "None - new pattern"]
+
+📊 Estimated Tasks: [Number]
+🎯 Confidence Score: [X]/10 for one-pass success
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 To execute this plan, run:
+
+    /core_piv_loop:execute .agents/plans/[feature-name].md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**STOP HERE - DO NOT PROCEED WITH EXECUTION**
