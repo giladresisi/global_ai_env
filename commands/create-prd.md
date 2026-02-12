@@ -76,13 +76,38 @@ Your preference?
 
 For each API requiring research:
 1. **Execute**: `/core_piv_loop:explore-api [API name]`
-2. **Read**: `.agent/research/[api]-research.md`
+2. **Read**: `.agents/research/[api]-research.md`
 3. **Verify**: POC tests passed
+
+### Critical Verification Requirements
+
+**For EVERY external API/service, research MUST verify:**
+
+1. **Feasibility**: Is what we want to achieve **technically possible** with this API?
+   - Does the API provide the required features/endpoints?
+   - Are there version/compatibility constraints?
+   - Are there known limitations that block our use case?
+
+2. **Allowability**: Is what we want to achieve **permitted** by the service?
+   - Rate limits sufficient for our needs?
+   - API tier/plan supports required features?
+   - Terms of Service allow our intended use?
+   - Geographic/regulatory restrictions?
+
+3. **Setup Requirements**: What external setup is needed?
+   - Account creation/API key generation steps
+   - Dashboard/console configuration
+   - Webhooks or callback URL setup
+   - OAuth app registration
+   - Service-specific prerequisites
 
 **Do not proceed without**:
 - ✓ User confirmation on research approach
 - ✓ Completed API research (if chosen)
 - ✓ Research documents read (if provided)
+- ✓ **Feasibility verified** (we CAN do what we want)
+- ✓ **Allowability verified** (we're ALLOWED to do what we want)
+- ✓ **Setup requirements documented** (we know HOW to configure it)
 
 ---
 
@@ -477,7 +502,7 @@ Phase 3 (Final Integration)
 #### API: [Name] v[Version]
 
 **Documentation:** [URL]
-**Research Document:** `.agent/research/[api]-research.md` (if applicable)
+**Research Document:** `.agents/research/[api]-research.md` (if applicable)
 **Purpose:** [Why used]
 **Authentication:** [Method]
 
@@ -554,33 +579,75 @@ Phase 3 (Final Integration)
 - **Handoff Artifacts**: What each workstream delivers to others
 
 ```markdown
-### Phase N: [Name] ([Period])
+### Phase 1: [Name] ([Period])
+
+**CRITICAL FOR EXTERNAL DEPENDENCIES:**
+If project uses external APIs/services, Phase 1 MUST include:
+- **External Service Setup**: Complete all account creation, API key generation, dashboard configuration
+- **External Service Verification**: Test that ALL external services work as expected with our requirements
+- **Fallback Planning**: Document what to do if external service setup/verification fails
 
 **Goal:** [One sentence]
 
 **Parallelization Strategy:**
 - **Concurrent Workstreams**: [Number] independent workstreams
-- **Can Start After**: Phase [X] completes (or "Day 1" if no dependencies)
+- **Can Start After**: External service verification passes (if applicable), or "Day 1" (if no external dependencies)
 
 **Workstreams:**
 
-#### Workstream A: [Name]
+#### Workstream A: External Service Setup & Verification (If Applicable)
+**Assigned To:** integration-specialist
+**Dependencies:** None - must happen FIRST
+**Deliverables:**
+- All external API accounts created and configured
+- API keys/credentials securely stored
+- Dashboard/console settings configured
+- Connectivity tests passing
+- Feature compatibility verified
+
+**Setup Tasks:**
+- Create accounts on [Service A], [Service B]
+- Generate API keys and store in secure config
+- Configure webhooks/callbacks if needed
+- Set up OAuth apps if needed
+- Test basic API connectivity
+
+**Verification Tests:**
+```bash
+# Test each external service
+# Verify required features are accessible
+# Confirm rate limits and quotas are sufficient
+```
+
+**Critical Checkpoints:**
+- [ ] All external services accessible with credentials
+- [ ] Required API features verified as available
+- [ ] No blocking compatibility issues discovered
+- [ ] Setup documented for team reference
+
+**If Verification Fails:**
+- Document the blocker (missing feature, access denied, etc.)
+- Evaluate alternatives (different API tier, alternative service)
+- Update implementation plan OR escalate for requirement changes
+- DO NOT PROCEED to Phase 2 until resolved
+
+#### Workstream B: [Name]
 **Assigned To:** [Agent role - e.g., backend-specialist, frontend-specialist, test-specialist]
-**Dependencies:** [None / Workstream X from Phase Y]
+**Dependencies:** [Workstream A if external APIs involved / None otherwise]
 **Deliverables:**
 - [Item 1]
 - [Item 2]
 
 **Integration Points:**
-- **Provides to Workstream B**: [API contract, data schema, etc.]
-- **Receives from Workstream C**: [Configuration, endpoints, etc.]
+- **Provides to Workstream C**: [API contract, data schema, etc.]
+- **Receives from Workstream A**: [Verified external service access, configuration]
 
 **Validation:**
 ```bash
 # Commands to verify this workstream's completion
 ```
 
-#### Workstream B: [Name]
+#### Workstream C: [Name]
 **Assigned To:** [Agent role]
 **Dependencies:** [Workstream dependencies]
 **Deliverables:**
@@ -593,6 +660,40 @@ Phase 3 (Final Integration)
 **Validation:**
 ```bash
 # Commands to verify completion
+```
+
+**Phase 1 Integration Test:**
+```bash
+# Commands to verify all workstreams integrate correctly
+# MUST include external service integration tests if applicable
+```
+
+---
+
+### Phase N: [Name] ([Period])
+
+**Goal:** [One sentence]
+
+**Parallelization Strategy:**
+- **Concurrent Workstreams**: [Number] independent workstreams
+- **Can Start After**: Phase [X] completes (or "Day 1" if no dependencies)
+
+**Workstreams:**
+
+#### Workstream A: [Name]
+**Assigned To:** [Agent role]
+**Dependencies:** [None / Workstream X from Phase Y]
+**Deliverables:**
+- [Item 1]
+- [Item 2]
+
+**Integration Points:**
+- **Provides to Workstream B**: [API contract, data schema, etc.]
+- **Receives from Workstream C**: [Configuration, endpoints, etc.]
+
+**Validation:**
+```bash
+# Commands to verify this workstream's completion
 ```
 
 **Phase Integration Test:**

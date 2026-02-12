@@ -19,7 +19,7 @@ These instructions apply to all projects unless overridden by project-specific C
 
 ### Planning & Execution
 - For non-trivial tasks, create a plan before implementing
-- Save plans to `.agent/plans/` directory
+- Save plans to `.agents/plans/` directory
 - Include validation steps in all plans
 - Mark plan complexity: ✅ Simple, ⚠️ Medium, 🔴 Complex
 
@@ -72,7 +72,7 @@ These instructions apply to all projects unless overridden by project-specific C
 Preferred structure:
 ```
 project/
-├── .agent/
+├── .agents/
 │   └── plans/           # Implementation plans
 ├── docs/                # Documentation
 ├── tests/               # Test files

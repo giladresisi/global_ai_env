@@ -175,7 +175,7 @@ Determine:
 
 1. **Use `/core_piv_loop:explore-api [API name]` for each API**
    - Wait for research completion
-   - Read generated research document: `.agent/research/[api]-research.md`
+   - Read generated research document: `.agents/research/[api]-research.md`
    - Verify POC tests passed
 
 2. **Critical Questions to Answer:**
@@ -186,11 +186,37 @@ Determine:
    - What configuration/setup is required?
    - What are known limitations or gotchas?
 
-3. **Document in Plan:**
+3. **Feasibility & Allowability Verification (MANDATORY):**
+
+   **Feasibility Check:**
+   - ✓ Required features are **technically available** in the API
+   - ✓ API version supports our use case
+   - ✓ No known bugs or limitations block our implementation
+   - ✓ Performance/latency acceptable for our needs
+   - ✓ Data format/structure matches our requirements
+
+   **Allowability Check:**
+   - ✓ API **rate limits** sufficient for our expected usage
+   - ✓ Required features available in **accessible pricing tier**
+   - ✓ **Terms of Service** permit our intended use case
+   - ✓ No geographic or regulatory restrictions apply
+   - ✓ Authentication method available to us
+
+   **Setup Requirements Check:**
+   - Document all prerequisite steps (account creation, approvals, etc.)
+   - List required credentials and where to obtain them
+   - Note any external dashboard/console configuration needed
+   - Identify webhook/callback setup if required
+   - Determine if OAuth app registration needed
+
+4. **Document in Plan:**
    - Add to CONTEXT REFERENCES > External API Research
    - Include integration patterns
    - Note compatibility constraints
    - Reference POC test results
+   - **Document setup requirements** for Phase 1
+   - **List verification tests** to confirm service access
+   - **Define fallback strategy** if verification fails
 
 ### 3.2 Technology & Pattern Research
 
@@ -320,7 +346,7 @@ So that <benefit/value>
 For each external API:
 
 **API:** [Name] v[Version]
-**Research Doc:** `.agent/research/[api]-research.md`
+**Research Doc:** `.agents/research/[api]-research.md`
 **Documentation:** [Primary URL with specific sections]
 
 **Supported Features:**
@@ -513,36 +539,144 @@ For each external API:
 
 ## IMPLEMENTATION PLAN
 
-### Phase 1: Foundation
+### Phase 1: Foundation & External Service Verification
 
 <Describe foundational work needed before main implementation>
 
-**Parallelization:** ✅ All tasks in this phase can run concurrently
+**CRITICAL: If this feature uses external APIs/services, Phase 1 MUST include:**
+1. **Complete all external service setup** (accounts, API keys, configuration)
+2. **Verify all external services work** as expected with our requirements
+3. **Test integration patterns** identified during research
+4. **Confirm feasibility** before proceeding to Phase 2
+
+**Parallelization:** ⚠️ External service setup must complete FIRST, then other tasks can run concurrently
 
 **Tasks:**
 
-- Set up base structures (schemas, types, interfaces)
-- Configure necessary dependencies
-- Create foundational utilities or helpers
+#### Task 1.1: External Service Setup & Verification (If Applicable - MUST BE FIRST)
+**Purpose:** Set up and verify ALL external APIs/services before building on top of them
 
-#### Task: [API Name] Integration Setup (If Applicable)
-**Purpose:** Configure [API] with proper initialization order and validation
+**CRITICAL:** This task is a BLOCKER. If verification fails, we MUST update the plan or escalate.
+
+**Setup Steps:**
+1. Review API research: `.agents/research/[api]-research.md`
+2. Create accounts / generate API keys for:
+   - [Service A]: [account creation URL]
+   - [Service B]: [account creation URL]
+3. Configure external service dashboards:
+   - [Service A]: Set up [webhook URLs, OAuth apps, etc.]
+   - [Service B]: Configure [settings, permissions, etc.]
+4. Store credentials securely:
+   ```bash
+   # Add to .env (do not commit)
+   SERVICE_A_API_KEY=...
+   SERVICE_B_API_KEY=...
+   ```
+5. Implement service initialization with correct configuration
+6. Add connection validation on startup
+
+**Verification Tests:**
+```bash
+# Test Service A connectivity and features
+[command to test Service A basic connection]
+[command to verify required Service A features accessible]
+
+# Test Service B connectivity and features
+[command to test Service B basic connection]
+[command to verify required Service B features accessible]
+```
+
+**Verification Checklist:**
+- [ ] All service accounts created and accessible
+- [ ] API keys/credentials generated and stored securely
+- [ ] Required API features confirmed available (not just account access)
+- [ ] Rate limits verified as sufficient for our needs
+- [ ] Authentication working (test with actual API call)
+- [ ] Response format matches expectations from research
+- [ ] No unexpected errors or access restrictions
+- [ ] Setup documented for other team members
+
+**Expected Success Output:**
+```
+[Exact output showing successful connection and feature availability]
+```
+
+**If Verification Fails:**
+1. **Document the blocker:**
+   - Which service/feature failed?
+   - What error occurred?
+   - Is it a configuration issue or a fundamental limitation?
+
+2. **Evaluate options:**
+   - Can we fix configuration?
+   - Do we need a different API tier/plan?
+   - Is there an alternative service?
+   - Should we modify requirements?
+
+3. **Update plan or escalate:**
+   - If fixable: Update setup steps and retry
+   - If alternative exists: Research alternative and update plan
+   - If blocking: STOP and escalate to user for decision
+
+**DO NOT PROCEED TO OTHER PHASE 1 TASKS UNTIL THIS PASSES**
+
+**Reference:**
+- Research doc: `.agents/research/[api]-research.md`
+- Setup guide: [link from research]
+
+---
+
+#### Task 1.2: Set up base structures (schemas, types, interfaces)
+**Purpose:** Create foundational data structures
+
+**Dependencies:** Task 1.1 (if external APIs involved) - we need verified API response formats
 
 **Steps:**
-1. Review API research: `.agent/research/[api]-research.md`
-2. Set up configuration (env vars, etc.)
-3. Implement initialization with correct import order
-4. Add startup validation (API key test, connection test)
-5. Create POC integration test
+- Define data models based on verified API schemas
+- Create type definitions
+- Set up interfaces for services
 
 **Validation:**
 ```bash
-# Command to verify setup works
+# Type checking passes
 [validation command]
 ```
-**Expected:** [what success output looks like]
 
-**Reference:** [link to API research findings]
+---
+
+#### Task 1.3: Configure necessary dependencies
+**Purpose:** Install and configure required libraries
+
+**Dependencies:** None (can run in parallel with Task 1.2)
+
+**Steps:**
+- Install required packages
+- Update configuration files
+- Set up dependency injection if needed
+
+**Validation:**
+```bash
+# Dependencies installed and importable
+[validation command]
+```
+
+---
+
+#### Task 1.4: Create foundational utilities or helpers
+**Purpose:** Build reusable utility functions
+
+**Dependencies:** Task 1.2 (needs type definitions)
+
+**Steps:**
+- Create helper functions following codebase patterns
+- Add error handling utilities
+- Implement logging helpers
+
+**Validation:**
+```bash
+# Unit tests for utilities pass
+[validation command]
+```
 
 ### Phase 2: Core Implementation
 
@@ -606,13 +740,67 @@ Each task includes:
 
 ---
 
-### WAVE 1: Foundation Layer (Fully Parallel)
+### WAVE 1: Foundation Layer (External Service Setup FIRST, Then Parallel)
 
-#### Task 1.1: {ACTION} {target_file}
+**CRITICAL:** If feature uses external APIs/services, Task 1.1 MUST be external service setup and verification. All other Wave 1 tasks depend on this.
+
+#### Task 1.1: External Service Setup & Verification (REQUIRED if feature uses external APIs/services)
+
+**⚠️ BLOCKER TASK:** If this fails, update plan or escalate. Do NOT proceed to other tasks.
+
+- **WAVE**: 1
+- **AGENT_ROLE**: integration-specialist
+- **DEPENDS_ON**: []
+- **BLOCKS**: [ALL other tasks that use external services]
+- **PROVIDES**: Verified external service access, API credentials, confirmed feature availability
+- **IMPLEMENT**:
+  - Create accounts for [Service A], [Service B], etc.
+  - Generate and securely store API keys/credentials
+  - Configure external dashboards (webhooks, OAuth apps, settings)
+  - Test basic connectivity for each service
+  - Verify required features are accessible (not just account access)
+  - Confirm rate limits sufficient for our usage
+  - Test actual API calls match research expectations
+- **SETUP_STEPS**:
+  1. [Service A] account: [URL to create account]
+  2. Generate API key: [Where in dashboard]
+  3. Configure: [Specific settings]
+  4. Store in `.env`: `SERVICE_A_API_KEY=...`
+  5. Repeat for each service
+- **VERIFICATION_TESTS**:
+  ```bash
+  # Test connectivity
+  [command to verify Service A connection]
+
+  # Verify required features
+  [command to test specific feature from research]
+
+  # Check authentication
+  [command to confirm API key works]
+  ```
+- **SUCCESS_CRITERIA**:
+  - [ ] All accounts created and accessible
+  - [ ] Credentials stored securely
+  - [ ] Required features confirmed available
+  - [ ] Rate limits verified as sufficient
+  - [ ] Test API calls successful
+  - [ ] Response formats match research
+- **IF_FAILS**:
+  - Document blocker (which service, what error)
+  - Evaluate alternatives (different tier, different service, requirement change)
+  - Update plan OR escalate to user
+  - STOP execution until resolved
+- **VALIDATE**: `[command to run all verification tests]`
+- **INTEGRATION_TEST**: `[command to test service integration with our initial config]`
+- **RESEARCH_REFERENCE**: `.agents/research/[api]-research.md`
+
+---
+
+#### Task 1.2: {ACTION} {target_file}
 
 - **WAVE**: 1
 - **AGENT_ROLE**: [backend/frontend/test/infra]
-- **DEPENDS_ON**: []
+- **DEPENDS_ON**: [Task 1.1 if external APIs involved, otherwise []]
 - **BLOCKS**: [Task IDs that need this]
 - **PROVIDES**: [Interface/contract for downstream tasks]
 - **IMPLEMENT**: {Specific implementation detail}
@@ -768,30 +956,50 @@ def test_tool_invocation():
 
 Execute every command to ensure zero regressions and 100% feature correctness.
 
-### Level 0: API Integration Validation (If Applicable)
+### Level 0: External Service Validation (If Applicable - MUST PASS BEFORE OTHER VALIDATION)
 
-For each external API:
+**CRITICAL:** This validation confirms that all external service setup from Phase 1 is working. If this fails, the entire feature is blocked.
 
-#### [API Name] Validation
+For each external API/service:
+
+#### [Service Name] Setup Validation
 ```bash
-# Verify API configuration
-[command to check env vars, config]
+# Verify service account and credentials
+[command to check account access, API key validity]
 
-# Test API connectivity
-[command to test API key, connection]
+# Test basic connectivity
+[command to test connection to service]
 
-# Verify response format
-[command to test actual API call]
+# Verify required features are accessible
+[command to test specific feature availability - not just connection]
+
+# Confirm rate limits and quotas
+[command to check current usage vs. limits]
+
+# Test actual integration pattern from research
+[command to execute POC test from research phase]
 ```
 
 **Expected Output:**
-- Configuration: [what should be set]
-- Connection: [success indicators]
-- Response: [expected format/data]
+- Account Status: Active, accessible with credentials
+- Connection: Successful authentication, no errors
+- Feature Availability: [Specific features] confirmed accessible
+- Rate Limits: [X requests/min] available, sufficient for our needs
+- Integration Pattern: [Expected response format from research]
 
 **If Failed:**
-- Check: [troubleshooting steps]
-- Fallback: [alternative approach]
+- **Account/Credentials:** Check API key, account status, regenerate if needed
+- **Connection:** Check network, firewall, service status page
+- **Feature Unavailable:** Check API tier/plan, contact support, or find alternative
+- **Rate Limits:** Upgrade plan, implement caching, or redesign approach
+- **Integration Pattern:** Review research doc, check API version, update implementation
+
+**Fallback Strategy:**
+- If blocking issue: Document problem and STOP execution
+- If configuration issue: Fix and retry
+- If fundamental limitation: Update plan with alternative approach OR escalate to user
+
+**DO NOT PROCEED TO LEVEL 1+ VALIDATION UNTIL ALL SERVICES PASS**
 
 ### Level 1: Syntax & Style
 
@@ -819,8 +1027,15 @@ For each external API:
 
 <List specific, measurable criteria that must be met for completion>
 
+- [ ] **External Services (if applicable):**
+  - [ ] All external service accounts created and accessible
+  - [ ] All API keys/credentials generated and stored securely
+  - [ ] All required external features verified as available
+  - [ ] All external service integration tests passing
+  - [ ] Rate limits confirmed as sufficient
+  - [ ] External service setup documented
 - [ ] Feature implements all specified functionality
-- [ ] All validation commands pass with zero errors
+- [ ] All validation commands pass with zero errors (including Level 0 external service validation)
 - [ ] Unit test coverage meets requirements (80%+)
 - [ ] Integration tests verify end-to-end workflows
 - [ ] Code follows project conventions and patterns
@@ -833,9 +1048,13 @@ For each external API:
 
 ## COMPLETION CHECKLIST
 
-- [ ] All tasks completed in order
+- [ ] **Phase 1 External Service Verification (if applicable):**
+  - [ ] All external services set up and verified BEFORE other implementation
+  - [ ] External service validation (Level 0) passes
+  - [ ] No blockers from external service limitations
+- [ ] All tasks completed in order (respecting wave dependencies)
 - [ ] Each task validation passed immediately
-- [ ] All validation commands executed successfully
+- [ ] All validation commands executed successfully (Levels 0-5)
 - [ ] Full test suite passes (unit + integration)
 - [ ] No linting or type checking errors
 - [ ] Manual testing confirms feature works
@@ -895,6 +1114,14 @@ wc -l .agents/plans/[feature-name].md
 - [ ] **Integration checkpoints specified for each wave**
 - [ ] **Shared context structure documented**
 - [ ] **At least 30% of tasks can execute in parallel** (or explain why not)
+- [ ] **External Service Setup (if applicable):**
+  - [ ] Phase 1 Task 1.1 is external service setup and verification
+  - [ ] All required external services identified
+  - [ ] Setup steps documented (account creation, API keys, configuration)
+  - [ ] Verification tests defined with expected outputs
+  - [ ] Fallback strategy documented if verification fails
+  - [ ] Level 0 validation includes external service checks
+  - [ ] Acceptance criteria includes external service verification
 
 ---
 
@@ -925,6 +1152,18 @@ wc -l .agents/plans/[feature-name].md
 - [ ] Agent role assignments suggested
 - [ ] Mock strategies provided for blocked parallel work
 - [ ] Integration tests defined for each wave
+
+### External Service Integration Ready ✓ (If Applicable)
+
+- [ ] All external APIs/services identified during research
+- [ ] Feasibility verified (features are technically possible)
+- [ ] Allowability verified (permitted by ToS, rate limits, pricing tier)
+- [ ] Setup requirements fully documented (accounts, keys, config)
+- [ ] Phase 1 Task 1.1 is external service setup and verification
+- [ ] Verification tests defined with expected success outputs
+- [ ] Fallback strategy documented if verification fails
+- [ ] Level 0 validation includes external service checks
+- [ ] External services marked as BLOCKER dependencies for dependent tasks
 
 ### Pattern Consistency ✓
 

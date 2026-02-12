@@ -97,7 +97,7 @@ Create minimal working example to validate understanding:
 ## Output Format
 
 ### API Research Document
-Create file: `.agent/research/[api-name]-research.md`
+Create file: `.agents/research/[api-name]-research.md`
 
 Contents:
 - API Overview & Version
