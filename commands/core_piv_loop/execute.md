@@ -1,148 +1,122 @@
----
-description: Execute an implementation plan
-argument-hint: [path-to-plan]
----
-
 # Execute: Implement from Plan
 
 ## Plan to Execute
 
-Read plan file: `$ARGUMENTS`
+Read plan file and execute all tasks according to the plan's specifications.
+
+---
+
+## Execution Mode Decision Protocol
+
+**REQUIRED:** Before executing, analyze the plan and explicitly state your execution mode decision.
+
+### Step 1: Parse Plan for Parallel Signals
+
+Read the plan and check for these explicit parallel execution indicators:
+
+1. **"Parallel Execution Strategy" section** - Strongest signal
+   - If present, extract the team structure, agent roles, and phase definitions
+   - This section takes precedence over generic heuristics
+
+2. **"Parallel Execution:" metadata** - Top-level plan metadata
+   - Look for: `**Parallel Execution:** ✅ **Yes**` or similar
+   - Indicates plan author explicitly designed for parallelism
+
+3. **"Team Structure" section** - Defined agent assignments
+   - Lists specific agents (e.g., "Agent 1 (Backend-API)", "Agent 2 (Frontend)")
+   - Shows clear role separation suitable for parallel work
+
+4. **"Execution Order" with phases** - Multi-phase execution plan
+   - Shows dependencies between phases
+   - Indicates which tasks can run concurrently
+
+### Step 2: Evaluate Complexity and Task Count
+
+If no explicit parallel signals found, fall back to task analysis:
+
+- Count total tasks in "Step by Step Tasks" section
+- Identify task dependencies (sequential chains vs. independent tasks)
+- Assess task domains (frontend/backend separation enables parallelism)
+- Consider execution time (long-running tasks benefit from parallelism)
+
+### Step 3: Output Execution Mode Decision
+
+**MANDATORY OUTPUT:** Print your decision using this template:
+
+\`\`\`
+## EXECUTION MODE DECISION
+
+**Plan:** [plan name]
+**Decision:** [TEAM-BASED PARALLEL | SEQUENTIAL]
+
+**Reasoning:**
+- Parallel signals found: [Yes/No]
+  - Has "Parallel Execution Strategy" section: [Yes/No]
+  - Has explicit team structure: [Yes/No]
+  - Has phase-based execution order: [Yes/No]
+- Task count: [N tasks]
+- Task dependencies: [describe dependency structure]
+- Complexity assessment: [Simple/Medium/Complex]
+
+**Conclusion:**
+[1-2 sentences explaining why you chose team-based or sequential execution]
+
+**Team structure (if parallel):**
+[List agent roles and responsibilities from plan, or design team if not specified]
+\`\`\`
+
+### Step 4: Proceed with Chosen Strategy
+
+Based on your decision, jump to either:
+- **Team-Based Parallel Execution** section (if team-based)
+- **Sequential Execution** section (if sequential)
+
+---
+
+## Decision Criteria (Priority Order)
+
+Use these criteria in priority order. Higher priority criteria override lower ones.
+
+### Priority 1: Explicit Parallel Strategy in Plan (HIGHEST)
+- ✅ **Use Team-Based:** Plan has "Parallel Execution Strategy" section
+- ✅ **Use Team-Based:** Plan has "Team Structure" with named agents
+- ✅ **Use Team-Based:** Plan has "Execution Order" with parallel phases
+
+### Priority 2: Plan Metadata
+- ✅ **Use Team-Based:** Complexity marked as 🔴 Complex or ⚠️ Medium with 4+ tasks
+- ✅ **Use Team-Based:** Parallel Execution metadata says "✅ Yes"
+- ⚠️ **Consider Team-Based:** Complexity marked as ⚠️ Medium with frontend + backend split
+
+### Priority 3: Task Analysis (Fallback)
+- ✅ **Use Team-Based:** 4+ tasks with clear domain separation (frontend/backend)
+- ✅ **Use Team-Based:** 3+ independent long-running tasks (e.g., multiple test suites)
+- ❌ **Use Sequential:** 1-3 simple tasks with sequential dependencies
+- ❌ **Use Sequential:** All tasks tightly coupled (changes require coordination)
+
+### Priority 4: Efficiency Tradeoff
+- ⚠️ **Avoid Team-Based:** Team overhead > time savings (very simple plans)
+- ✅ **Use Team-Based:** Estimated sequential time > 2 hours
+- ✅ **Use Team-Based:** Validation can run in parallel with implementation
+
+---
 
 ## Execution Mode
 
-Determine execution strategy based on plan complexity:
+After completing the Execution Mode Decision Protocol above, you will execute using one of these strategies:
 
-- **Simple plans (1-3 independent tasks):** Execute sequentially without team
-- **Complex plans (4+ tasks or parallel opportunities):** Use team-based parallel execution
+- **Sequential Execution:** For simple plans (see criteria in Decision Protocol)
+- **Team-Based Parallel Execution:** For complex plans or plans with explicit parallel strategy
 
-## Team-Based Parallel Execution
+**NOTE:** If the plan includes a "Parallel Execution Strategy" section, you MUST use team-based execution, even if task count is low. The plan author has explicitly designed the work for parallelism.
 
-### 1. Plan Analysis & Team Setup
+---
 
-**Read and analyze the plan:**
-- Read the ENTIRE plan carefully
-- Identify all tasks and their dependencies
-- Map dependency graph (which tasks block which other tasks)
-- Identify validation commands and testing strategy
-- Determine wave structure based on dependencies
+## Sequential Execution
 
-**Create execution team:**
-```
-Use TeamCreate to create a team named "execute-{plan-name}"
-```
-
-**Team roles:**
-- **Team Lead (you):** Orchestrate execution, manage task list, verify integration
-- **Implementation Agents:** Execute code tasks in parallel
-- **Test Agent:** Create and run tests
-- **Validation Agent:** Run validation commands and verify results
-
-### 2. Task Breakdown & Assignment
-
-**Create task list from plan:**
-
-For each task in the plan, use `TaskCreate` to create:
-- **Subject:** Brief task title (imperative form)
-- **Description:** Full task specification from plan
-- **ActiveForm:** Present continuous form for progress tracking
-- **Dependencies:** Use `TaskUpdate` to set `addBlockedBy` for dependent tasks
-
-**Task categories:**
-- Implementation tasks (code changes)
-- Test tasks (test file creation, test implementation)
-- Validation tasks (running checks, linting, type checking)
-- Integration tasks (ensuring components work together)
-
-**Assign tasks to create waves:**
-- **Wave 1:** Tasks with no dependencies (can run immediately)
-- **Wave 2:** Tasks that depend only on Wave 1 completion
-- **Wave N:** Tasks that depend on previous waves
-
-### 3. Spawn Teammates
-
-**Spawn implementation agents for Wave 1:**
-
-For each independent task group, spawn a `general-purpose` agent:
-```
-Use Task tool with subagent_type="general-purpose"
-```
-
-**Example team structure:**
-- `frontend-impl`: Handle frontend implementation tasks
-- `backend-impl`: Handle backend implementation tasks
-- `test-impl`: Create and run tests
-- `validator`: Run validation commands
-
-**Assign tasks to teammates:**
-Use `TaskUpdate` with `owner` parameter to assign tasks by ID
-
-### 4. Wave-Based Parallel Execution
-
-**For each wave:**
-
-1. **Start wave:** Assign all wave tasks to available teammates
-2. **Monitor progress:** Teammates will send updates when tasks complete
-3. **Handle blockers:** If a teammate is blocked, help resolve or reassign
-4. **Verify wave completion:** Check all wave tasks are completed
-5. **Proceed to next wave:** Unblock dependent tasks and repeat
-
-**Coordination protocol:**
-- Teammates mark tasks `in_progress` when starting
-- Teammates mark tasks `completed` when done
-- Team lead uses `TaskList` to track overall progress
-- Team lead assigns next available tasks from subsequent waves
-- Communication via `SendMessage` for blockers or questions
-
-### 5. Testing & Validation Phase
-
-**After all implementation waves complete:**
-
-1. **Test agent tasks:**
-   - Create all test files from plan
-   - Implement all test cases
-   - Run tests and report results
-
-2. **Validation agent tasks:**
-   - Run linting commands
-   - Run type checking
-   - Run any custom validation from plan
-   - Report all results
-
-**Run in parallel where possible:**
-- Independent test suites can run concurrently
-- Validation commands that don't conflict can run together
-
-### 6. Integration Verification
-
-**Team lead responsibilities:**
-
-- ✅ Verify all tasks from plan completed
-- ✅ Check all tests passing
-- ✅ Confirm all validation commands pass
-- ✅ Test integration between components
-- ✅ Verify code follows project conventions
-- ✅ Ensure documentation added/updated
-
-**Integration checks:**
-- Do frontend and backend connect properly?
-- Are all imports resolving correctly?
-- Do modified components still work with existing code?
-- Are there any runtime errors?
-
-### 7. Team Shutdown
-
-**Graceful shutdown:**
-1. Use `TaskList` to confirm all tasks completed
-2. Use `SendMessage` with `type: "shutdown_request"` for each teammate
-3. Wait for shutdown confirmations
-4. Use `TeamDelete` to clean up team resources
-
-## Sequential Execution (Simple Plans)
-
-For simple plans, execute without team overhead:
+For simple plans (1-3 independent tasks, no parallel execution strategy):
 
 ### 1. Read and Understand
+
 - Read the ENTIRE plan carefully
 - Understand all tasks and their dependencies
 - Note the validation commands to run
@@ -168,6 +142,9 @@ For EACH task in "Step by Step Tasks":
 - Verify types are properly defined
 
 ### 3. Implement Testing Strategy
+
+After completing implementation tasks:
+
 - Create all test files specified in the plan
 - Implement all test cases mentioned
 - Follow the testing approach outlined
@@ -175,11 +152,7 @@ For EACH task in "Step by Step Tasks":
 
 ### 4. Run Validation Commands
 
-Execute ALL validation commands from the plan in order:
-
-```bash
-# Run each command exactly as specified in plan
-```
+Execute ALL validation commands from the plan in order.
 
 If any command fails:
 - Fix the issue
@@ -187,97 +160,154 @@ If any command fails:
 - Continue only when it passes
 
 ### 5. Final Verification
+
+Before completing:
+
 - ✅ All tasks from plan completed
 - ✅ All tests created and passing
 - ✅ All validation commands pass
 - ✅ Code follows project conventions
 - ✅ Documentation added/updated as needed
 
-## Output Report
+---
 
-Provide summary (format depends on execution mode):
+## Team-Based Parallel Execution
 
-### Execution Summary
-- **Execution mode:** Sequential or Team-based Parallel
-- **Plan source:** Path to plan file
-- **Execution time:** Approximate duration
-- **Team size:** Number of agents spawned (if parallel)
+For complex plans (4+ tasks, parallel opportunities, or explicit parallel strategy):
 
-### Completed Tasks
-- List of all tasks completed (by wave if parallel)
-- Files created (with paths and which agent created them)
-- Files modified (with paths and which agent modified them)
-- Task completion order and any blockers encountered
+### 1. Plan Analysis & Team Setup
 
-### Tests Added
-- Test files created
-- Test cases implemented
-- Test results (pass/fail counts)
-- Coverage information (if applicable)
+#### a. Read and Parse Plan
+- Read ENTIRE plan carefully
+- If plan has "Parallel Execution Strategy" section, extract team structure and phases
+- If no explicit team structure, analyze tasks to design team composition
+- Identify task dependencies and blocking relationships
+- Note validation commands and testing strategy
 
-### Validation Results
-```bash
-# Output from each validation command
-# Include which agent ran each command (if parallel)
-```
+#### b. Create Team
+Use TeamCreate tool:
+- team_name: "execute-{plan-name}"
+- description: "Executing {plan-name} with parallel agents"
 
-### Integration Verification
-- Component integration status
-- Cross-module compatibility checks
-- Any integration issues found and resolved
+### 2. Task Breakdown & Assignment
 
-### Performance Metrics (Team-Based Only)
-- Number of waves executed
-- Tasks per wave breakdown
-- Parallelization efficiency
-- Bottlenecks identified (tasks that blocked multiple waves)
+#### a. Create Tasks from Plan
+For each task in the plan, create using TaskCreate
 
-### Ready for Commit
-- ✅ All changes are complete
-- ✅ All validations pass
-- ✅ Integration verified
-- ✅ Ready for `/commit` command
+#### b. Map Tasks to Agents
+
+**Common Team Structures:**
+
+**3-Agent Team (Frontend/Backend split):**
+- Agent 1 (Backend-API): API endpoints, routers, configuration
+- Agent 2 (Backend-Core): Core services, business logic
+- Agent 3 (Frontend): UI components, hooks, types
+
+**4-Agent Team (Full-stack + Database):**
+- Agent 1 (Database): Migrations, schema changes
+- Agent 2 (Backend-Processing): Core services and processing
+- Agent 3 (Backend-API): API layer
+- Agent 4 (Frontend): UI and integration
+
+### 3. Spawn Teammates & Execute in Waves
+
+Create general-purpose agents for each role and execute tasks in dependency-based waves.
+
+### 4. Integration Verification & Team Shutdown
+
+Verify all tasks complete, tests pass, then gracefully shut down team.
+
+---
 
 ## Best Practices
 
+### Parsing Plan for Execution Guidance
+
+**Always check for explicit parallel execution sections first:**
+
+1. **Read plan header** - Look for metadata like complexity markers and parallel execution flags
+2. **Search for section headers** - "Parallel Execution Strategy", "Team Structure", "Execution Order"
+3. **Extract team definitions** - If plan defines agents, use those exact role names
+4. **Follow plan's phase structure** - If plan defines Phase 1/2/3, use those as waves
+5. **Respect plan dependencies** - If plan says "Agent 2 depends on Agent 1", enforce blocking
+
+**Example: Plan with Explicit Strategy**
+
+If plan contains "Parallel Execution Strategy" section with 3 agents defined, you MUST:
+1. Create team with 3 agents using exact roles from plan
+2. Assign tasks according to plan's agent mapping
+3. Follow plan's execution order (phases)
+
 ### When to Use Parallel Execution
-- ✅ Plan has 4+ independent tasks
-- ✅ Clear frontend/backend separation
-- ✅ Multiple test suites that can run independently
-- ✅ Long-running validation commands that can be parallelized
-- ❌ Avoid for simple plans (overhead not worth it)
-- ❌ Avoid if tasks have complex interdependencies (creates bottlenecks)
 
-### Task Dependency Patterns
-- **No dependencies:** Perfect for Wave 1 parallel execution
-- **Sequential chain:** Must execute in order (A → B → C)
-- **Fan-out:** One task enables many (A → B,C,D can parallelize B,C,D)
-- **Fan-in:** Many tasks feed into one (A,B,C → D, wait for all before D)
+**Use team-based parallel execution when:**
+- ✅ Plan explicitly defines parallel execution strategy
+- ✅ 4+ tasks with clear domain separation
+- ✅ Frontend and backend work can proceed independently
+- ✅ Multiple long-running test suites can run concurrently
 
-### Communication Patterns
-- **Team lead → Teammate:** Task assignment, clarification, shutdown requests
-- **Teammate → Team lead:** Completion notifications, blocker reports, questions
-- **Teammate → Teammate:** Rare, only for direct coordination needs
+**Use sequential execution when:**
+- ✅ 1-3 simple, fast tasks
+- ✅ Tasks have tight sequential dependencies
+- ✅ All work affects the same files (high conflict risk)
 
-### Error Handling
-- If a teammate fails a task, team lead should:
-  1. Review the error and context
-  2. Decide: reassign, help debug, or take over
-  3. Update task status and dependencies if needed
-  4. Continue wave execution with remaining tasks
+---
 
-### Optimization Tips
-- Group related tasks (e.g., all frontend tasks to one agent)
-- Assign test creation early so tests can run as soon as code is ready
-- Run validation commands in parallel where safe (linting + type checking)
-- Keep team size reasonable (3-5 agents max for most plans)
+## Decision Examples
 
-## Notes
+### Example 1: Plan with Explicit Parallel Strategy
 
-- If you encounter issues not addressed in the plan, document them
-- If you need to deviate from the plan, explain why and communicate with team
-- If tests fail, fix implementation until they pass (coordinate with test agent)
-- Don't skip validation steps
-- For parallel execution, maintain clear task ownership to avoid conflicts
-- Use atomic commits per wave or per major milestone
-- Team coordination overhead is real - only parallelize when it provides clear benefit
+**Plan Structure:**
+- Has "Parallel Execution Strategy" section ✅
+- Defines 3 agents with specific roles ✅
+- Shows phase-based execution order ✅
+
+**Decision:**
+TEAM-BASED PARALLEL - Plan explicitly defines 3-agent team structure. Must use team-based execution as plan author designed for parallelism.
+
+### Example 2: Simple Sequential Plan
+
+**Plan Structure:**
+- No "Parallel Execution Strategy" section ❌
+- 2 tasks with sequential dependency
+- Complexity: Simple
+
+**Decision:**
+SEQUENTIAL - No parallel signals, only 2 tightly coupled tasks. Team overhead not justified.
+
+### Example 3: Complex Plan (Design Team Yourself)
+
+**Plan Structure:**
+- No explicit parallel strategy ❌
+- 8 tasks: 4 frontend + 4 backend
+- Complexity: Complex
+- Clear domain separation
+
+**Decision:**
+TEAM-BASED PARALLEL - Clear frontend/backend separation justifies team execution. Design 3-agent team to parallelize work.
+
+---
+
+## Output Report
+
+After execution completes, provide summary:
+
+### Completed Tasks
+- List of all tasks completed
+- Files created/modified with paths
+
+### Tests Added
+- Test files created
+- Test results
+
+### Validation Results
+Output from validation commands
+
+### Execution Metrics (if team-based)
+- Number of agents used
+- Estimated time saved vs sequential
+- Coordination overhead
+
+### Ready for Commit
+- Confirm all changes complete
+- Confirm all validations pass
