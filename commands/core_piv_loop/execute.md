@@ -4,6 +4,20 @@
 
 Read plan file and execute all tasks according to the plan's specifications.
 
+## ⚠️ CRITICAL: Mandatory Validation Requirements
+
+**This skill enforces BLOCKING validation gates.**
+
+Execution is NOT complete until:
+- ✅ All implementation tasks finished
+- ✅ All tests created and passing
+- ✅ All validation commands executed and passed
+- ✅ All verification gates passed
+
+**You CANNOT claim execution complete or generate the final Output Report until ALL validation requirements pass.**
+
+Validation steps use MANDATORY, BLOCKING, and CRITICAL language to indicate enforcement. These are not optional or advisory - they are hard requirements that gate completion.
+
 ---
 
 ## Execution Mode Decision Protocol
@@ -141,33 +155,91 @@ For EACH task in "Step by Step Tasks":
 - Ensure imports are correct
 - Verify types are properly defined
 
-### 3. Implement Testing Strategy
+### 2.5. MANDATORY: Test Implementation Check
 
-After completing implementation tasks:
+**REQUIRED BEFORE PROCEEDING TO STEP 3:**
 
-- Create all test files specified in the plan
-- Implement all test cases mentioned
-- Follow the testing approach outlined
-- Ensure tests cover edge cases
+1. **Check if plan specifies test files or test cases**
+   - Review "Testing Strategy" section in plan
+   - Review "Validation" section for test requirements
+   - Check task descriptions for test-related work
 
-### 4. Run Validation Commands
+2. **If tests ARE specified in plan:**
+   - Create/update all specified test files
+   - Implement all specified test cases
+   - Run the test suite and capture output
+   - Fix any failures
+   - Confirm all tests pass
+   - Show test results
 
-Execute ALL validation commands from the plan in order.
+3. **If NO tests specified in plan:**
+   - Confirm with user: "Plan doesn't specify tests. Should I add tests for [implemented features]?"
+   - Wait for user response before proceeding
 
-If any command fails:
-- Fix the issue
-- Re-run the command
-- Continue only when it passes
+**DO NOT skip to validation without addressing test requirements.**
 
-### 5. Final Verification
+### 3. MANDATORY: Run Validation Commands
 
-Before completing:
+**CRITICAL:** Execute EVERY validation command listed in the plan.
 
-- ✅ All tasks from plan completed
-- ✅ All tests created and passing
-- ✅ All validation commands pass
+For EACH validation command:
+
+1. **Run the command** - Execute exactly as specified in plan
+2. **Capture and display full output** - Show complete command output
+3. **Evaluate result:**
+   - ✅ **PASS:** Mark as passed and continue to next command
+   - ❌ **FAIL:** Mark as failed and STOP immediately
+4. **If FAIL:**
+   - Analyze the failure
+   - Fix the issue
+   - Re-run the command
+   - Repeat until PASS
+5. **Continue only when ALL commands pass**
+
+**Verification Summary:**
+
+After all commands run, display summary:
+```
+VALIDATION SUMMARY:
+- Command 1: ✅ PASS (output shown above)
+- Command 2: ✅ PASS (output shown above)
+- Command 3: ✅ PASS (output shown above)
+...
+
+Status: [ALL PASSED / FAILURES DETECTED]
+```
+
+**If ANY command shows ❌ FAIL, execution is INCOMPLETE - fix and re-validate.**
+
+### 4. MANDATORY VERIFICATION GATE - EXECUTION INCOMPLETE UNTIL ALL PASS
+
+**CRITICAL:** You CANNOT proceed to "Output Report" until ALL items below pass.
+
+**BLOCKING REQUIREMENTS:**
+
+- ✅ All tasks from plan completed (list them)
+- ✅ All tests created and passing (show test run output)
+- ✅ All validation commands pass (show validation summary)
 - ✅ Code follows project conventions
 - ✅ Documentation added/updated as needed
+
+**Verification Process:**
+
+1. Review each checklist item
+2. Provide evidence for each (test output, validation results, etc.)
+3. If ANY item is ❌ INCOMPLETE:
+   - DO NOT generate Output Report
+   - DO NOT claim execution complete
+   - Fix the incomplete item
+   - Re-verify
+   - ONLY proceed when all ✅ COMPLETE
+
+**Self-Check Question:**
+"Can I confidently claim this execution is production-ready?"
+- If NO → execution is INCOMPLETE, continue fixing
+- If YES → proceed to Output Report
+
+**DO NOT claim execution complete with failing validations or missing tests.**
 
 ---
 
@@ -213,9 +285,80 @@ For each task in the plan, create using TaskCreate
 
 Create general-purpose agents for each role and execute tasks in dependency-based waves.
 
-### 4. Integration Verification & Team Shutdown
+**During Execution:**
+- Monitor teammate progress via messages
+- Address blockers immediately
+- Ensure agents mark tasks complete when done
+- Coordinate integration points between agents
 
-Verify all tasks complete, tests pass, then gracefully shut down team.
+### 4. MANDATORY: Integration & Testing Verification
+
+**REQUIRED BEFORE PROCEEDING:**
+
+After all teammates complete their assigned tasks:
+
+1. **Verify Integration:**
+   - Check all file changes are compatible
+   - Verify imports/exports between modules work
+   - Test integration points manually if needed
+
+2. **Run Test Suite:**
+   - Execute ALL tests specified in plan
+   - Capture complete output
+   - If failures detected:
+     - Fix issues
+     - Re-run tests
+     - Continue until all pass
+
+3. **Display Test Results:**
+```
+TEST EXECUTION RESULTS:
+[Show full test output]
+
+Status: ✅ All tests passing
+```
+
+### 5. MANDATORY: Run Validation Commands
+
+**CRITICAL:** Execute EVERY validation command listed in the plan.
+
+For EACH validation command:
+
+1. **Run the command**
+2. **Capture and display full output**
+3. **Evaluate result:**
+   - ✅ **PASS:** Continue to next
+   - ❌ **FAIL:** STOP, fix, and re-run
+
+**Validation Summary:**
+```
+VALIDATION SUMMARY:
+- Command 1: ✅ PASS
+- Command 2: ✅ PASS
+- Command 3: ✅ PASS
+...
+
+Status: [ALL PASSED / FAILURES DETECTED]
+```
+
+### 6. MANDATORY: Pre-Shutdown Verification Gate
+
+**BLOCKING REQUIREMENTS - Cannot shutdown team until ALL pass:**
+
+- ✅ All tasks complete (verify via TaskList)
+- ✅ All tests passing (output shown)
+- ✅ All validation commands pass (summary shown)
+- ✅ Integration verified
+- ✅ No blocking issues remain
+
+**Only after ALL items ✅ COMPLETE:**
+
+### 7. Team Shutdown
+
+Gracefully shut down all teammates:
+- Send shutdown requests to each agent
+- Wait for acknowledgment
+- Delete team using TeamDelete
 
 ---
 
@@ -290,24 +433,55 @@ TEAM-BASED PARALLEL - Clear frontend/backend separation justifies team execution
 
 ## Output Report
 
-After execution completes, provide summary:
+**ONLY generate this report after passing Step 4 Mandatory Verification Gate.**
+
+After execution completes and all validations pass, provide summary:
 
 ### Completed Tasks
-- List of all tasks completed
+- List all tasks completed with checkmarks
 - Files created/modified with paths
 
-### Tests Added
-- Test files created
-- Test results
+### Test Results
+
+**Tests Created/Updated:**
+- [List test files created]
+- [List test files updated]
+
+**Test Suite Execution:**
+```
+[Show full test suite output]
+```
+
+**Status:** ✅ All tests passing
 
 ### Validation Results
-Output from validation commands
+
+**Validation Commands Executed:**
+
+| Level | Command | Status | Output |
+|-------|---------|--------|--------|
+| 1 | [command] | ✅ PASS | [summary] |
+| 2 | [command] | ✅ PASS | [summary] |
+| 3 | [command] | ✅ PASS | [summary] |
+| ... | ... | ... | ... |
+
+**Validation Summary:** ✅ ALL VALIDATIONS PASSED
+
+### Code Quality
+
+- ✅ Code follows project conventions
+- ✅ Documentation added/updated
+- ✅ Types properly defined
+- ✅ Error handling implemented
 
 ### Execution Metrics (if team-based)
 - Number of agents used
 - Estimated time saved vs sequential
 - Coordination overhead
+- Task distribution across agents
 
-### Ready for Commit
-- Confirm all changes complete
-- Confirm all validations pass
+### Final Status
+
+✅ **EXECUTION COMPLETE** - All implementations, tests, and validations passed successfully.
+
+**Ready for commit:** Yes - all changes verified and production-ready.
