@@ -35,6 +35,73 @@ These instructions apply to all projects unless overridden by project-specific C
 - Use existing test credentials when available
 - Prefer automated tests over manual testing where practical
 
+### Credentials & Secrets Management
+
+**CRITICAL: Never write real credentials in non-gitignored files.**
+
+#### Real Credentials (API Keys, Passwords, Tokens)
+
+**DO:**
+- ✅ Store real credentials ONLY in `.env` or other gitignored files
+- ✅ Create testing utility modules that read credentials from `.env`:
+  - `tests/utils/test-auth.ts` (frontend)
+  - `tests/utils/test_auth.py` (backend)
+  - These utils fetch real credentials at runtime from environment
+- ✅ Verify `.env` is in `.gitignore` before writing credentials
+
+**DO NOT:**
+- ❌ Write real credentials in `.env.example`
+- ❌ Write real credentials in code files (even in tests)
+- ❌ Write real credentials in documentation
+- ❌ Gitignore new files that weren't already gitignored
+- ❌ Commit real API keys, passwords, tokens, or secrets
+
+#### Example/Mock Credentials
+
+In files like `.env.example`, `README.md`, or documentation:
+
+**Use hidden/masked values:**
+```
+# BAD - Real credentials visible
+TEST_EMAIL=test@test.com
+TEST_PASSWORD=123456
+API_KEY=sk_live_abc123xyz
+
+# GOOD - Masked credentials
+TEST_EMAIL=test@...
+TEST_PASSWORD=****
+API_KEY=sk_live_...
+```
+
+#### Testing Pattern
+
+**Example testing utility (TypeScript):**
+```typescript
+// tests/utils/test-auth.ts
+export const getTestCredentials = () => ({
+  email: process.env.TEST_EMAIL!,
+  password: process.env.TEST_PASSWORD!
+});
+```
+
+**Example testing utility (Python):**
+```python
+# tests/utils/test_auth.py
+import os
+
+def get_test_credentials():
+    return {
+        "email": os.getenv("TEST_EMAIL"),
+        "password": os.getenv("TEST_PASSWORD")
+    }
+```
+
+**Usage in tests:**
+```typescript
+import { getTestCredentials } from './utils/test-auth';
+const { email, password } = getTestCredentials();
+```
+
 ### Documentation
 - Keep README.md up to date
 - Document setup steps and prerequisites
@@ -88,7 +155,8 @@ project/
 - ❌ Don't create files unnecessarily
 - ❌ Don't refactor code that wasn't requested
 - ❌ Don't add features beyond the scope
-- ❌ Don't commit sensitive data (API keys, passwords, etc.)
+- ❌ Don't commit sensitive data (API keys, passwords, etc.) - see "Credentials & Secrets Management"
+- ❌ Don't write real credentials in non-gitignored files (.env.example, docs, code)
 - ❌ Don't make breaking changes without discussion
 - ❌ Don't bypass security checks or validation
 
