@@ -67,7 +67,7 @@ robocopy venv ..\{branch-name}\venv /E /NFL /NDL /NJH /NJS /nc /ns /np
 cp -r venv ../{branch-name}/venv
 ```
 
-## Step 6: Install Dependencies
+## Step 6: Install Python Dependencies
 
 Use Glob to find all `requirements.txt` files in:
 - Top-level: `requirements.txt`
@@ -87,13 +87,37 @@ cd ../{branch-name}/backend
 venv/bin/python -m pip install -r requirements.txt
 ```
 
-## Step 7: Report Completion
+## Step 7: Install npm Dependencies
+
+Use Glob to find all `package.json` files in:
+- Top-level: `package.json`
+- Frontend: `frontend/package.json`
+- Backend: `backend/package.json`
+
+For each package.json found:
+1. Navigate to the target worktree directory containing the package.json
+2. Run npm install
+
+```bash
+# Windows
+cd ..\{branch-name}\frontend
+npm install
+
+# Unix/Mac
+cd ../{branch-name}/frontend
+npm install
+```
+
+**Important:** Install npm dependencies in ALL directories that have a package.json file (top-level, frontend/, backend/, or any other subdirectories).
+
+## Step 8: Report Completion
 
 Provide a summary to the user:
 - Worktree created at: `../{branch-name}`
 - .env files copied: [list]
 - venv folders copied: [list]
-- Dependencies installed in: [list]
+- Python dependencies installed in: [list]
+- npm dependencies installed in: [list]
 
 ## Platform Detection
 
@@ -111,6 +135,7 @@ Use appropriate commands (copy vs cp, robocopy vs cp -r, Scripts vs bin) based o
 - If .env copy fails, warn but continue
 - If venv copy fails, warn but continue
 - If pip install fails, warn but continue
+- If npm install fails, warn but continue
 - Always report which steps succeeded and which failed
 
 ## Example Execution
@@ -129,8 +154,12 @@ Copying .env files...
 Copying venv folders...
 ✓ Copied backend/venv (large folder, may take a moment)
 
-Installing dependencies...
+Installing Python dependencies...
 ✓ Installed backend/requirements.txt (15 packages)
+
+Installing npm dependencies...
+✓ Installed frontend/package.json (127 packages)
+✓ Installed backend/package.json (43 packages)
 
 Worktree setup complete! You can now work in ../feature-auth
 ```
