@@ -14,6 +14,27 @@ This command creates a plan file only. After the plan is created:
 2. Tell them to run `/core_piv_loop:execute .agents/plans/[feature-name].md` to implement it
 3. STOP - do not proceed with implementation
 
+**⚠️ EXECUTION AGENT INSTRUCTION:**
+
+When this plan is executed, the execution agent MUST:
+- Make ALL code changes required by the plan
+- Leave ALL changes UNSTAGED (do NOT commit)
+- Allow the user to review changes with `git diff` before committing
+- This instruction will be included in every plan file generated
+
+**⚠️ PLAN OUTPUT REQUIREMENT:**
+
+**ALL plan content MUST be written to `.agents/plans/[feature-name].md` - NOT to the CLI**
+- Do NOT output the plan content as a message to the user
+- ONLY write the plan to the file using the Write or Edit tool
+- When updating an existing plan, use Edit tool to modify the file directly
+
+**What to output to CLI:**
+- Summary of what you're planning
+- Questions using AskUserQuestion (if needed)
+- Confirmation that plan was saved and where
+- Final report (see FINAL REPORT section)
+
 ---
 
 ## Feature: $ARGUMENTS
@@ -22,370 +43,247 @@ This command creates a plan file only. After the plan is created:
 
 Transform a feature request into a **comprehensive implementation plan** through systematic codebase analysis, external research, and strategic planning.
 
-**Core Principle**: We do NOT write code in this phase. Our goal is to create a context-rich implementation plan that enables one-pass implementation success for ai agents.
+**Core Principle**: Create a context-rich plan that enables one-pass implementation success for AI agents.
 
-**Key Philosophy**: Context is King. The plan must contain ALL information needed for implementation - patterns, mandatory reading, documentation, validation commands - so the execution agent succeeds on the first attempt.
+**Key Philosophy**: Context is King. The plan must contain ALL information needed for implementation - patterns, mandatory reading, documentation, validation commands.
 
 ## Planning Process
 
 ### Phase 1: Feature Understanding
-
-**Deep Feature Analysis:**
 
 - Extract the core problem being solved
 - Identify user value and business impact
 - Determine feature type: New Capability/Enhancement/Refactor/Bug Fix
 - Assess complexity: Low/Medium/High
 - Map affected systems and components
-
-**Create User Story Format Or Refine If Story Was Provided By The User:**
-
-```
-As a <type of user>
-I want to <action/goal>
-So that <benefit/value>
-```
+- Create/refine user story:
+  ```
+  As a <type of user>
+  I want to <action/goal>
+  So that <benefit/value>
+  ```
 
 ### Phase 2: Codebase Intelligence Gathering
 
 **CRITICAL: Check for Similar Features First**
 
-Before designing a new implementation approach, search for features that are similar to what's being requested:
+Before designing a new approach, search for similar existing features. If found:
+1. **STOP and ask the user** using AskUserQuestion: "I found [existing feature] which is similar. Should I use the same approach or different architecture?"
+2. Wait for user confirmation
+3. Document the existing feature's approach as baseline
 
-**If you find a similar existing feature:**
-1. **STOP and ask the user**: "I found [existing feature] which is similar to [requested feature]. Should I implement [requested feature] using the same approach as [existing feature], or do you want a different implementation strategy?"
-2. **Wait for user confirmation** before proceeding with the plan
-3. **Document the existing feature's approach** as the baseline pattern to follow
-
-**Common Similar Feature Patterns:**
-- Adding a new integration (e.g., "Add Stripe") → Check how existing integrations are implemented
-- Adding a new API endpoint → Check existing endpoint implementations
-- Adding a new authentication method → Check existing auth implementations
-- Adding a new database table/model → Check existing schema patterns
-- Adding a new tool/command → Check existing tool implementations
-- Adding a new UI component → Check existing component patterns
-
-**Why This Matters:**
-- Users typically want consistency across similar features
-- Following existing patterns ensures maintainability
-- Prevents over-engineering or unnecessary architectural changes
-- Saves time by reusing proven approaches
-
-**Example:**
-```
-User: "Add Gemini model support with ability to switch between Claude and Gemini"
-
-✅ CORRECT:
-- Find how Claude is currently integrated (settings, API keys, model configuration)
-- Ask: "I see Claude is integrated via ANTHROPIC_API_KEY and llm_provider settings.
-  Should I integrate Gemini the same way (GOOGLE_API_KEY + update model selection)?
-  Or do you want a different architecture?"
-
-❌ INCORRECT:
-- Design a completely new factory pattern for model switching
-- Create complex tool-copying mechanisms
-- Implement without checking existing integration approach
-```
+**Common patterns to check:**
+- New integration → Check existing integrations
+- New API endpoint → Check existing endpoints
+- New auth method → Check existing auth
+- New database table → Check existing schema
+- New tool/command → Check existing tools
+- New UI component → Check existing components
 
 **After User Confirms Approach:**
 
-**Use specialized agents and parallel analysis:**
+Use specialized agents and parallel analysis:
 
-**1. Project Structure Analysis**
+1. **Project Structure**: Languages, frameworks, directory structure, service boundaries, config files
+2. **Pattern Recognition**: Similar implementations, naming conventions, error handling, logging patterns, check CLAUDE.md
+3. **Dependency Analysis**: External libraries, integration patterns, relevant documentation (docs/, ai_docs/, .agents/reference)
+4. **Testing Patterns**: Test framework, test organization, coverage requirements
+5. **Integration Points**: Files to update vs create, router patterns, database/model patterns, auth patterns
 
-- Detect primary language(s), frameworks, and runtime versions
-- Map directory structure and architectural patterns
-- Identify service/component boundaries and integration points
-- Locate configuration files (pyproject.toml, package.json, etc.)
-- Find environment setup and build processes
+**Clarify Ambiguities (MANDATORY):**
 
-**2. Pattern Recognition** (Use specialized subagents when beneficial)
+**⚠️ CRITICAL: You MUST use AskUserQuestion tool if ANY of the following exist:**
+- Requirements are unclear, ambiguous, or contradictory
+- Missing critical information about scope, behavior, or constraints
+- Multiple valid implementation approaches without clear preference
+- Conflicts between user request and existing patterns
+- Uncertainty about data models, schemas, or interfaces
+- Questions about integrations, external services, or dependencies
+- Unclear acceptance criteria or success metrics
+- Any doubt about what the user wants or how to implement it
 
-- Search for similar implementations in codebase
-- Identify coding conventions:
-  - Naming patterns (CamelCase, snake_case, kebab-case)
-  - File organization and module structure
-  - Error handling approaches
-  - Logging patterns and standards
-- Extract common patterns for the feature's domain
-- Document anti-patterns to avoid
-- Check CLAUDE.md for project-specific rules and conventions
-
-**3. Dependency Analysis**
-
-- Catalog external libraries relevant to feature
-- Understand how libraries are integrated (check imports, configs)
-- Find relevant documentation in docs/, ai_docs/, .agents/reference or ai-wiki if available
-- Note library versions and compatibility requirements
-
-**4. Testing Patterns**
-
-- Identify test framework and structure (pytest, jest, etc.)
-- Find similar test examples for reference
-- Understand test organization (unit vs integration)
-- Note coverage requirements and testing standards
-
-**5. Integration Points**
-
-- Identify existing files that need updates
-- Determine new files that need creation and their locations
-- Map router/API registration patterns
-- Understand database/model patterns if applicable
-- Identify authentication/authorization patterns if relevant
-
-**Clarify Ambiguities:**
-
-- If requirements are unclear at this point, ask the user to clarify before you continue
-- Get specific implementation preferences (libraries, approaches, patterns)
-- Resolve architectural decisions before proceeding
+**DO NOT proceed with planning if you have ANY uncertainty. Stop and ask first.**
 
 **Design Decisions (Follow Existing Patterns):**
 
-When designing the approach:
-1. **Default to mimicking existing similar features** unless there's a clear reason to diverge
-2. **Document why** if you're diverging from existing patterns
-3. **Prefer consistency over novelty** - reuse existing architectural patterns
-4. **Design for parallel execution** - identify which tasks are independent
+When designing:
+1. Default to mimicking existing similar features unless there's a clear reason to diverge
+2. Document why if diverging from existing patterns
+3. Prefer consistency over novelty
+4. Design for parallel execution - identify independent tasks
 
 Determine:
-- Files to create vs modify (follow existing structure)
-- Data flow and component interactions (mirror similar features)
-- Models/schemas required (match existing naming/structure)
-- Service layer components (reuse existing patterns)
-- API contracts (consistent with existing endpoints)
-- Testing strategy (same approach as similar features)
+- Files to create vs modify, data flow, models/schemas, service components, API contracts, testing strategy
 - Error scenarios and edge cases
 - **Parallelization opportunities** - which tasks have no dependencies
 - **Interface contracts** - what parallel tasks need from each other
 - **Integration points** - where parallel work must synchronize
 
-**Red Flags** (warrant asking user for clarification):
+**Red Flags** (warrant asking user):
 - Introducing new architectural patterns not used elsewhere
 - Creating new folder structures when similar features exist
 - Using different naming conventions than existing code
-- Implementing features in a completely different way than similar existing features
 
 ### Phase 3: External Research & Documentation
 
-**Use specialized subagents when beneficial for external research:**
+#### 3.1 API Research (If Applicable)
 
-### 3.1 API Research (If Applicable)
-
-**If the feature uses external APIs or unfamiliar SDKs:**
+**If feature uses external APIs or unfamiliar SDKs:**
 
 1. **Use `/core_piv_loop:explore-api [API name]` for each API**
-   - Wait for research completion
-   - Read generated research document: `.agents/research/[api]-research.md`
+   - Read generated research: `.agents/research/[api]-research.md`
    - Verify POC tests passed
 
-2. **Critical Questions to Answer:**
-   - Is the required feature supported by the API?
+2. **Critical Questions:**
+   - Is the required feature supported?
    - What's the correct integration pattern?
-   - Are there version compatibility issues?
-   - What are the event types / response formats?
-   - What configuration/setup is required?
-   - What are known limitations or gotchas?
+   - Version compatibility issues?
+   - Event types/response formats?
+   - Configuration/setup required?
+   - Known limitations or gotchas?
 
 3. **Feasibility & Allowability Verification (MANDATORY):**
+   - ✓ Required features technically available in API
+   - ✓ API version supports use case
+   - ✓ No blocking bugs or limitations
+   - ✓ Performance/latency acceptable
+   - ✓ Rate limits sufficient for usage
+   - ✓ Features available in accessible pricing tier
+   - ✓ Terms of Service permit intended use
+   - ✓ No geographic/regulatory restrictions
+   - ✓ Authentication method available
 
-   **Feasibility Check:**
-   - ✓ Required features are **technically available** in the API
-   - ✓ API version supports our use case
-   - ✓ No known bugs or limitations block our implementation
-   - ✓ Performance/latency acceptable for our needs
-   - ✓ Data format/structure matches our requirements
-
-   **Allowability Check:**
-   - ✓ API **rate limits** sufficient for our expected usage
-   - ✓ Required features available in **accessible pricing tier**
-   - ✓ **Terms of Service** permit our intended use case
-   - ✓ No geographic or regulatory restrictions apply
-   - ✓ Authentication method available to us
-
-   **Setup Requirements Check:**
-   - Document all prerequisite steps (account creation, approvals, etc.)
-   - List required credentials and where to obtain them
-   - Note any external dashboard/console configuration needed
+4. **Setup Requirements:**
+   - Document prerequisite steps (account creation, approvals)
+   - List required credentials and where to obtain
+   - Note dashboard/console configuration needed
    - Identify webhook/callback setup if required
-   - Determine if OAuth app registration needed
 
-4. **Document in Plan:**
+5. **Document in Plan:**
    - Add to CONTEXT REFERENCES > External API Research
-   - Include integration patterns
-   - Note compatibility constraints
-   - Reference POC test results
-   - **Document setup requirements** for Phase 1
-   - **List verification tests** to confirm service access
-   - **Define fallback strategy** if verification fails
+   - Include integration patterns, compatibility constraints, POC results
+   - Document setup requirements for Phase 1
+   - List verification tests to confirm service access
+   - Define fallback strategy if verification fails
 
-### 3.2 Technology & Pattern Research
-
-**Documentation Gathering:**
+#### 3.2 Technology & Pattern Research
 
 - Research latest library versions and best practices
 - Find official documentation with specific section anchors
-- Locate implementation examples and tutorials
+- Locate implementation examples
 - Identify common gotchas and known issues
-- Check for breaking changes and migration guides
+- Check for breaking changes
 
-**Technology Trends:**
-
-- Research current best practices for the technology stack
-- Find relevant blog posts, guides, or case studies
-- Identify performance optimization patterns
-- Document security considerations
-
-### 3.3 Compile Research References
+#### 3.3 Compile Research References
 
 ```markdown
 ## Relevant Documentation
-
-- [Library Official Docs](https://example.com/docs#section)
-  - Specific feature implementation guide
-  - Why: Needed for X functionality
-- [Framework Guide](https://example.com/guide#integration)
-  - Integration patterns section
-  - Why: Shows how to connect components
+- [Library Docs](https://example.com/docs#section) - Why: Needed for X functionality
+- [Framework Guide](https://example.com/guide#integration) - Why: Integration patterns
 ```
 
 ### Phase 4: Deep Strategic Thinking
 
-**Think Harder About:**
-
-- How does this feature fit into the existing architecture?
-- What are the critical dependencies and order of operations?
+**Think About:**
+- How does this fit existing architecture?
+- Critical dependencies and order of operations?
 - What could go wrong? (Edge cases, race conditions, errors)
 - How will this be tested comprehensively?
-- What performance implications exist?
-- Are there security considerations?
-- How maintainable is this approach?
+- Performance implications?
+- Security considerations?
+- Maintainability?
 
-**Design Decisions:**
-
-- Choose between alternative approaches with clear rationale
-- Design for extensibility and future modifications
-- Plan for backward compatibility if needed
-- Consider scalability implications
+**Design for:**
+- Alternative approaches with clear rationale
+- Extensibility and future modifications
+- Backward compatibility if needed
+- Scalability implications
 
 ### Phase 5: Plan Structure Generation
-
-**Create comprehensive plan with the following structure:**
 
 **CRITICAL - Plan Length Constraint:**
 - **HARD LIMIT**: Maximum plan length: **500-700 lines**
 - Focus on essential information and actionable tasks
-- Be concise but complete - prioritize clarity over verbosity
-- If approaching the limit, consolidate similar tasks or reduce example code
+- Be concise but complete
 - Quality over quantity - dense, information-rich content
 - **You MUST verify line count after creation and adjust if needed**
 
-Whats below here is a template for you to fill for the implementation agent:
+**Plan Template Structure:**
 
 ```markdown
 # Feature: <feature-name>
 
-The following plan should be complete, but its important that you validate documentation and codebase patterns and task sanity before you start implementing.
+**⚠️ CRITICAL - DO NOT COMMIT CHANGES:**
+- Implement ALL changes required by this plan
+- Leave ALL changes UNSTAGED (do NOT run git add or git commit)
+- User will review changes with `git diff` before committing
+- Only make code changes - no git operations
 
-Pay special attention to naming of existing utils types and models. Import from the right files etc.
+Validate documentation and codebase patterns before implementing. Pay attention to naming of existing utils, types, and models. Import from correct files.
 
 ## Feature Description
 
-<Detailed description of the feature, its purpose, and value to users>
+<Detailed description of feature, purpose, and user value>
 
 ## User Story
 
-As a <type of user>
+As a <user type>
 I want to <action/goal>
 So that <benefit/value>
 
 ## Problem Statement
 
-<Clearly define the specific problem or opportunity this feature addresses>
+<Define the specific problem or opportunity>
 
 ## Solution Statement
 
-<Describe the proposed solution approach and how it solves the problem>
+<Describe the proposed solution approach>
 
 ## Feature Metadata
 
 **Feature Type**: [New Capability/Enhancement/Refactor/Bug Fix]
-**Estimated Complexity**: [Low/Medium/High]
-**Primary Systems Affected**: [List of main components/services]
-**Dependencies**: [External libraries or services required]
+**Complexity**: [Low/Medium/High]
+**Primary Systems Affected**: [Components/services]
+**Dependencies**: [External libraries or services]
 **Breaking Changes**: [Yes/No - explain if yes]
 
 ---
 
 ## CONTEXT REFERENCES
 
-### Relevant Codebase Files IMPORTANT: YOU MUST READ THESE FILES BEFORE IMPLEMENTING!
+### Relevant Codebase Files - MUST READ BEFORE IMPLEMENTING
 
-<List files with line numbers and relevance>
-
-- `path/to/file.py` (lines 15-45) - Why: Contains pattern for X that we'll mirror
-- `path/to/model.py` (lines 100-120) - Why: Database model structure to follow
-- `path/to/test.py` - Why: Test pattern example
+- `path/to/file.py` (lines 15-45) - Why: Pattern for X to mirror
+- `path/to/model.py` (lines 100-120) - Why: Database model structure
 
 ### New Files to Create
 
-- `path/to/new_service.py` - Service implementation for X functionality
-- `path/to/new_model.py` - Data model for Y resource
-- `tests/path/to/test_new_service.py` - Unit tests for new service
+- `path/to/new_service.py` - Service implementation for X
+- `tests/path/to/test_new_service.py` - Unit tests
 
-### Relevant Documentation YOU SHOULD READ THESE BEFORE IMPLEMENTING!
+### Relevant Documentation - READ BEFORE IMPLEMENTING
 
-- [Documentation Link 1](https://example.com/doc1#section)
-  - Specific section: Authentication setup
-  - Why: Required for implementing secure endpoints
-- [Documentation Link 2](https://example.com/doc2#integration)
-  - Specific section: Database integration
-  - Why: Shows proper async database patterns
+- [Doc Link](https://example.com/doc#section) - Why: Required for secure endpoints
 
 ### External API Research (If Applicable)
 
-For each external API:
-
 **API:** [Name] v[Version]
 **Research Doc:** `.agents/research/[api]-research.md`
-**Documentation:** [Primary URL with specific sections]
-
-**Supported Features:**
-- Feature [X]: ✓ Supported via [method]
-- Feature [Y]: ✗ Not supported - Alternative: [approach]
+**Documentation:** [Primary URL]
 
 **Integration Pattern:**
 ```[language]
-# Initialization
-[code example]
-
-# Usage
-[code example]
-
-# Error handling
-[code example]
+# Initialization, usage, error handling examples
 ```
 
-**Critical Findings:**
-- [Finding 1 that impacts implementation]
-- [Finding 2 about configuration]
-- [Finding 3 about limitations]
-
-**Validation Strategy:**
-- POC: [description of proof-of-concept test]
-- Expected: [what success looks like]
-- Fallback: [alternative if doesn't work]
+**Critical Findings:** [Key findings impacting implementation]
+**Validation Strategy:** [POC description, expected results, fallback]
 
 ### Patterns to Follow
 
-<Specific patterns extracted from codebase - include actual code examples from the project>
-
-**Naming Conventions:** (for example)
-
-**Error Handling:** (for example)
-
-**Logging Pattern:** (for example)
-
-**Other Relevant Patterns:** (for example)
+**Naming Conventions:** [Examples from codebase]
+**Error Handling:** [Examples from codebase]
+**Logging Pattern:** [Examples from codebase]
 
 ---
 
@@ -394,146 +292,35 @@ For each external API:
 ### Dependency Graph
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ FOUNDATION LAYER (Phase 1) - Can run in parallel           │
-├─────────────────────────────────────────────────────────────┤
-│ Task 1.1: [Name]  │ Task 1.2: [Name]  │ Task 1.3: [Name] │
-│ Agent: [Role]     │ Agent: [Role]     │ Agent: [Role]    │
-│ Deps: None        │ Deps: None        │ Deps: None       │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│ CORE LAYER (Phase 2) - After Foundation                     │
-├─────────────────────────────────────────────────────────────┤
-│ Task 2.1: [Name]  │ Task 2.2: [Name]  │                   │
-│ Agent: [Role]     │ Agent: [Role]     │                   │
-│ Deps: 1.1, 1.2    │ Deps: 1.3         │                   │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│ INTEGRATION LAYER (Phase 3) - After Core                    │
-├─────────────────────────────────────────────────────────────┤
-│ Task 3.1: [Name]                                            │
-│ Agent: [Role]                                               │
-│ Deps: 2.1, 2.2                                              │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│ WAVE 1: Foundation (Parallel)               │
+├─────────────────────────────────────────────┤
+│ Task 1.1: [Name] │ Task 1.2: [Name]        │
+│ Agent: [Role]    │ Agent: [Role]           │
+└─────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────┐
+│ WAVE 2: Core (After Wave 1)                 │
+├─────────────────────────────────────────────┤
+│ Task 2.1: [Name] - Deps: 1.1, 1.2          │
+└─────────────────────────────────────────────┘
 ```
 
-### Parallelization Opportunities
+### Parallelization Summary
 
-**Wave 1 - Fully Parallel** (No dependencies):
-- Task [X]: [Description] → Agent: [Role]
-- Task [Y]: [Description] → Agent: [Role]
-- Task [Z]: [Description] → Agent: [Role]
+**Wave 1 - Fully Parallel:** Tasks [X, Y, Z] - No dependencies
+**Wave 2 - Parallel after Wave 1:** Tasks [A, B] - Needs Wave 1
+**Wave 3 - Sequential:** Task [C] - Needs Wave 2
 
-**Wave 2 - Parallel after Wave 1**:
-- Task [A]: [Description] → Agent: [Role] → Needs: [Task X]
-- Task [B]: [Description] → Agent: [Role] → Needs: [Task Y, Z]
+### Interface Contracts
 
-**Wave 3 - Sequential** (Requires Wave 2):
-- Task [C]: [Description] → Agent: [Role] → Needs: [Task A, B]
-
-### Team Coordination
-
-**Shared Context Location:** `.agents/plans/shared-context.md`
-
-**Interface Contracts:**
-
-#### Contract 1: [Name]
-**Provider:** Task [X] (Agent [Role])
-**Consumer:** Task [A] (Agent [Role])
-**Interface:**
-```[language]
-# Definition of what Task X delivers to Task A
-```
-**Delivery:** After Task [X] validation passes
-**Mock for Parallel Work:**
-```[language]
-# How Task A can continue while Task X is in progress
-```
-
-#### Contract 2: [Name]
-[Repeat for each dependency between parallel workstreams]
+**Contract 1:** Task [X] provides [interface] → Task [A] consumes
+**Mock for Parallel Work:** [How Task A can continue while Task X in progress]
 
 ### Synchronization Checkpoints
 
-**Checkpoint 1:** After Wave 1 completes
-- **Participants:** Agents working on Tasks X, Y, Z
-- **Validation:** All Wave 1 tasks pass individual validation
-- **Integration Test:**
-```bash
-# Command to verify Wave 1 tasks work together
-```
-- **Blocker Resolution:** If any Wave 1 task fails, Wave 2 cannot start
-
-**Checkpoint 2:** After Wave 2 completes
-[Repeat structure]
-
-### Shared Context Management
-
-**Location:** `.agents/plans/shared-context.md`
-
-**Purpose:** Enable parallel agents to coordinate without blocking
-
-**Structure:**
-```markdown
-# Shared Context for [Feature Name]
-
-## Global Decisions
-- [Decision 1]: [Rationale]
-- [Decision 2]: [Rationale]
-
-## Naming Conventions
-- [Convention 1]
-- [Convention 2]
-
-## Interface Registry
-| Task | Provides | File Location | Status |
-|------|----------|---------------|--------|
-| 1.1  | [API]    | path/to/file  | ✅     |
-| 1.2  | [Schema] | path/to/file  | 🚧     |
-
-## Blockers & Questions
-| Task | Question | Answer | Resolved By |
-|------|----------|--------|-------------|
-| 2.1  | [Q]      | [A]    | Agent X     |
-
-## Integration Test Results
-| Checkpoint | Status | Notes |
-|------------|--------|-------|
-| Wave 1     | ✅     | All pass |
-| Wave 2     | 🚧     | In progress |
-```
-
-**Update Protocol:**
-- Agents update status when starting/completing tasks
-- Agents post questions in Blockers section
-- Other agents answer unblocked questions
-- Integration test results posted after each checkpoint
-
-### Agent Team Roles
-
-**Backend Specialist:**
-- Tasks involving: API endpoints, business logic, database models
-- Skills: Python/Node, SQL, API design
-
-**Frontend Specialist:**
-- Tasks involving: UI components, state management, user interactions
-- Skills: React/Vue, CSS, accessibility
-
-**Test Specialist:**
-- Tasks involving: Unit tests, integration tests, E2E tests
-- Skills: Testing frameworks, test data generation
-
-**Integration Specialist:**
-- Tasks involving: System integration, deployment, configuration
-- Skills: DevOps, CI/CD, troubleshooting
-
-**Coordination:**
-- Each agent owns their tasks in the wave
-- Agents read Shared Context before starting
-- Agents update Shared Context when completing
-- Agents post blockers immediately when encountered
+**After Wave 1:** Verify all Wave 1 tasks pass: `[integration test command]`
+**After Wave 2:** Verify Wave 2 integration: `[integration test command]`
 
 ---
 
@@ -541,547 +328,355 @@ For each external API:
 
 ### Phase 1: Foundation & External Service Verification
 
-<Describe foundational work needed before main implementation>
-
-**CRITICAL: If this feature uses external APIs/services, Phase 1 MUST include:**
-1. **Complete all external service setup** (accounts, API keys, configuration)
-2. **Verify all external services work** as expected with our requirements
-3. **Test integration patterns** identified during research
-4. **Confirm feasibility** before proceeding to Phase 2
-
-**Parallelization:** ⚠️ External service setup must complete FIRST, then other tasks can run concurrently
+**CRITICAL: If using external APIs/services, Phase 1 MUST include:**
+1. Complete all external service setup (accounts, API keys, config)
+2. Verify all services work as expected
+3. Test integration patterns from research
+4. Confirm feasibility before Phase 2
 
 **Tasks:**
 
-#### Task 1.1: External Service Setup & Verification (If Applicable - MUST BE FIRST)
-**Purpose:** Set up and verify ALL external APIs/services before building on top of them
+#### Task 1.1: External Service Setup & Verification (If Applicable - BLOCKER)
 
-**CRITICAL:** This task is a BLOCKER. If verification fails, we MUST update the plan or escalate.
+**⚠️ BLOCKER:** If verification fails, update plan or escalate.
 
 **Setup Steps:**
-1. Review API research: `.agents/research/[api]-research.md`
-2. Create accounts / generate API keys for:
-   - [Service A]: [account creation URL]
-   - [Service B]: [account creation URL]
-3. Configure external service dashboards:
-   - [Service A]: Set up [webhook URLs, OAuth apps, etc.]
-   - [Service B]: Configure [settings, permissions, etc.]
-4. Store credentials securely:
-   ```bash
-   # Add to .env (do not commit)
-   SERVICE_A_API_KEY=...
-   SERVICE_B_API_KEY=...
-   ```
-5. Implement service initialization with correct configuration
-6. Add connection validation on startup
+1. Review: `.agents/research/[api]-research.md`
+2. Create accounts/API keys for [services]
+3. Configure dashboards (webhooks, OAuth, settings)
+4. Store credentials in `.env` securely
+5. Implement service initialization
+6. Add connection validation
 
 **Verification Tests:**
 ```bash
-# Test Service A connectivity and features
-[command to test Service A basic connection]
-[command to verify required Service A features accessible]
-
-# Test Service B connectivity and features
-[command to test Service B basic connection]
-[command to verify required Service B features accessible]
+# Test connectivity and features for each service
+[commands to verify services]
 ```
 
-**Verification Checklist:**
-- [ ] All service accounts created and accessible
-- [ ] API keys/credentials generated and stored securely
-- [ ] Required API features confirmed available (not just account access)
-- [ ] Rate limits verified as sufficient for our needs
-- [ ] Authentication working (test with actual API call)
-- [ ] Response format matches expectations from research
-- [ ] No unexpected errors or access restrictions
-- [ ] Setup documented for other team members
+**Checklist:**
+- [ ] All accounts created and accessible
+- [ ] API keys generated and stored securely
+- [ ] Required features confirmed available
+- [ ] Rate limits verified sufficient
+- [ ] Authentication working
+- [ ] Response format matches expectations
+- [ ] No unexpected errors
+- [ ] Setup documented
 
-**Expected Success Output:**
-```
-[Exact output showing successful connection and feature availability]
-```
+**Expected Success:** [Exact output showing success]
 
-**If Verification Fails:**
-1. **Document the blocker:**
-   - Which service/feature failed?
-   - What error occurred?
-   - Is it a configuration issue or a fundamental limitation?
+**If Fails:**
+1. Document blocker (which service, error)
+2. Evaluate options (fix config, different tier, alternative, modify requirements)
+3. Update plan OR escalate - STOP until resolved
 
-2. **Evaluate options:**
-   - Can we fix configuration?
-   - Do we need a different API tier/plan?
-   - Is there an alternative service?
-   - Should we modify requirements?
-
-3. **Update plan or escalate:**
-   - If fixable: Update setup steps and retry
-   - If alternative exists: Research alternative and update plan
-   - If blocking: STOP and escalate to user for decision
-
-**DO NOT PROCEED TO OTHER PHASE 1 TASKS UNTIL THIS PASSES**
-
-**Reference:**
-- Research doc: `.agents/research/[api]-research.md`
-- Setup guide: [link from research]
+**DO NOT PROCEED TO OTHER TASKS UNTIL THIS PASSES**
 
 ---
 
-#### Task 1.2: Set up base structures (schemas, types, interfaces)
-**Purpose:** Create foundational data structures
+#### Task 1.2: [ACTION] [target_file]
 
-**Dependencies:** Task 1.1 (if external APIs involved) - we need verified API response formats
-
-**Steps:**
-- Define data models based on verified API schemas
-- Create type definitions
-- Set up interfaces for services
-
-**Validation:**
-```bash
-# Type checking passes
-[validation command]
-```
-
----
-
-#### Task 1.3: Configure necessary dependencies
-**Purpose:** Install and configure required libraries
-
-**Dependencies:** None (can run in parallel with Task 1.2)
-
-**Steps:**
-- Install required packages
-- Update configuration files
-- Set up dependency injection if needed
-
-**Validation:**
-```bash
-# Dependencies installed and importable
-[validation command]
-```
-
----
-
-#### Task 1.4: Create foundational utilities or helpers
-**Purpose:** Build reusable utility functions
-
-**Dependencies:** Task 1.2 (needs type definitions)
-
-**Steps:**
-- Create helper functions following codebase patterns
-- Add error handling utilities
-- Implement logging helpers
-
-**Validation:**
-```bash
-# Unit tests for utilities pass
-[validation command]
-```
+**Purpose:** [What this accomplishes]
+**Dependencies:** Task 1.1 (if external APIs), otherwise []
+**Steps:** [Implementation steps]
+**Validation:** `[command]`
 
 ### Phase 2: Core Implementation
 
-<Describe the main implementation work>
-
-**Tasks:**
-
-- Implement core business logic
-- Create service layer components
-- Add API endpoints or interfaces
-- Implement data models
+[Main implementation work - business logic, services, APIs, models]
 
 ### Phase 3: Integration
 
-<Describe how feature integrates with existing functionality>
-
-**Tasks:**
-
-- Connect to existing routers/handlers
-- Register new components
-- Update configuration files
-- Add middleware or interceptors if needed
+[How feature integrates - routers, registration, config, middleware]
 
 ### Phase 4: Testing & Validation
 
-<Describe testing approach>
-
-**Tasks:**
-
-- Implement unit tests for each component
-- Create integration tests for feature workflow
-- Add edge case tests
-- Validate against acceptance criteria
+[Testing approach - unit, integration, edge cases, acceptance]
 
 ---
 
 ## STEP-BY-STEP TASKS
 
-IMPORTANT: Tasks are organized by execution waves for parallel execution. Tasks within the same wave can be executed concurrently by different agents.
+Tasks organized by execution waves for parallel execution.
 
-### Task Format Guidelines
+### Task Format
 
-Use information-dense keywords for clarity:
-
-- **CREATE**: New files or components
+- **CREATE**: New files/components
 - **UPDATE**: Modify existing files
-- **ADD**: Insert new functionality into existing code
+- **ADD**: Insert new functionality
 - **REMOVE**: Delete deprecated code
-- **REFACTOR**: Restructure without changing behavior
-- **MIRROR**: Copy pattern from elsewhere in codebase
+- **REFACTOR**: Restructure without behavior change
+- **MIRROR**: Copy pattern from elsewhere
 
-### Task Metadata Format
+### Task Metadata
 
-Each task includes:
-- **WAVE**: Execution wave number (tasks in same wave = parallel)
+- **WAVE**: Execution wave (same wave = parallel)
 - **AGENT_ROLE**: Suggested agent specialization
-- **DEPENDS_ON**: Task IDs that must complete first (empty = no deps)
-- **BLOCKS**: Task IDs that wait for this task
-- **PROVIDES**: What this task delivers for downstream tasks
-- **INTEGRATION_TEST**: How to verify this integrates with parallel tasks
+- **DEPENDS_ON**: Task IDs that must complete first
+- **BLOCKS**: Task IDs waiting for this
+- **PROVIDES**: What this delivers for downstream tasks
+- **INTEGRATION_TEST**: Verify integration with parallel tasks
 
 ---
 
-### WAVE 1: Foundation Layer (External Service Setup FIRST, Then Parallel)
+### WAVE 1: Foundation
 
-**CRITICAL:** If feature uses external APIs/services, Task 1.1 MUST be external service setup and verification. All other Wave 1 tasks depend on this.
+**CRITICAL:** If using external APIs, Task 1.1 MUST be service setup/verification.
 
-#### Task 1.1: External Service Setup & Verification (REQUIRED if feature uses external APIs/services)
-
-**⚠️ BLOCKER TASK:** If this fails, update plan or escalate. Do NOT proceed to other tasks.
+#### Task 1.1: External Service Setup (REQUIRED if external APIs)
 
 - **WAVE**: 1
 - **AGENT_ROLE**: integration-specialist
 - **DEPENDS_ON**: []
-- **BLOCKS**: [ALL other tasks that use external services]
-- **PROVIDES**: Verified external service access, API credentials, confirmed feature availability
-- **IMPLEMENT**:
-  - Create accounts for [Service A], [Service B], etc.
-  - Generate and securely store API keys/credentials
-  - Configure external dashboards (webhooks, OAuth apps, settings)
-  - Test basic connectivity for each service
-  - Verify required features are accessible (not just account access)
-  - Confirm rate limits sufficient for our usage
-  - Test actual API calls match research expectations
-- **SETUP_STEPS**:
-  1. [Service A] account: [URL to create account]
-  2. Generate API key: [Where in dashboard]
-  3. Configure: [Specific settings]
-  4. Store in `.env`: `SERVICE_A_API_KEY=...`
-  5. Repeat for each service
-- **VERIFICATION_TESTS**:
-  ```bash
-  # Test connectivity
-  [command to verify Service A connection]
+- **BLOCKS**: [All tasks using external services]
+- **PROVIDES**: Verified service access, credentials, confirmed features
+- **IMPLEMENT**: Create accounts, generate keys, configure dashboards, test connectivity, verify features
+- **VERIFICATION**: `[commands to verify all services]`
+- **IF_FAILS**: Document blocker, evaluate alternatives, update plan OR escalate
+- **VALIDATE**: `[all verification tests]`
 
-  # Verify required features
-  [command to test specific feature from research]
-
-  # Check authentication
-  [command to confirm API key works]
-  ```
-- **SUCCESS_CRITERIA**:
-  - [ ] All accounts created and accessible
-  - [ ] Credentials stored securely
-  - [ ] Required features confirmed available
-  - [ ] Rate limits verified as sufficient
-  - [ ] Test API calls successful
-  - [ ] Response formats match research
-- **IF_FAILS**:
-  - Document blocker (which service, what error)
-  - Evaluate alternatives (different tier, different service, requirement change)
-  - Update plan OR escalate to user
-  - STOP execution until resolved
-- **VALIDATE**: `[command to run all verification tests]`
-- **INTEGRATION_TEST**: `[command to test service integration with our initial config]`
-- **RESEARCH_REFERENCE**: `.agents/research/[api]-research.md`
-
----
-
-#### Task 1.2: {ACTION} {target_file}
-
-- **WAVE**: 1
-- **AGENT_ROLE**: [backend/frontend/test/infra]
-- **DEPENDS_ON**: [Task 1.1 if external APIs involved, otherwise []]
-- **BLOCKS**: [Task IDs that need this]
-- **PROVIDES**: [Interface/contract for downstream tasks]
-- **IMPLEMENT**: {Specific implementation detail}
-- **PATTERN**: {Reference to existing pattern - file:line}
-- **IMPORTS**: {Required imports and dependencies}
-- **GOTCHA**: {Known issues or constraints to avoid}
-- **VALIDATE**: `{executable validation command}`
-- **INTEGRATION_TEST**: `{command to test with other Wave 1 tasks}`
-
-#### Task 1.2: {ACTION} {target_file}
+#### Task 1.2: {ACTION} {target}
 
 - **WAVE**: 1
 - **AGENT_ROLE**: [role]
-- **DEPENDS_ON**: []
-- **BLOCKS**: [Task IDs]
-- **PROVIDES**: [What it delivers]
-- **IMPLEMENT**: {Details}
-- **PATTERN**: {Reference}
-- **VALIDATE**: `{command}`
-- **INTEGRATION_TEST**: `{command}`
+- **DEPENDS_ON**: [Task 1.1 if APIs, else []]
+- **BLOCKS**: [IDs]
+- **PROVIDES**: [Interface for downstream]
+- **IMPLEMENT**: [Details]
+- **PATTERN**: [Reference file:line]
+- **VALIDATE**: `[command]`
+- **INTEGRATION_TEST**: `[command with Wave 1 peers]`
 
-#### Task 1.3: {ACTION} {target_file}
-
-[Repeat format for all Wave 1 tasks]
-
-**Wave 1 Integration Checkpoint:**
-```bash
-# Run after ALL Wave 1 tasks complete
-# Verifies that all parallel tasks integrate correctly
-[integration test command]
-```
+**Wave 1 Checkpoint:** `[integration test after all Wave 1 complete]`
 
 ---
 
-### WAVE 2: Core Layer (Parallel after Wave 1)
+### WAVE 2: Core (After Wave 1)
 
-**Prerequisites:** All Wave 1 tasks must pass validation and integration tests
-
-#### Task 2.1: {ACTION} {target_file}
+#### Task 2.1: {ACTION} {target}
 
 - **WAVE**: 2
 - **AGENT_ROLE**: [role]
-- **DEPENDS_ON**: [Task 1.1, Task 1.2]
-- **BLOCKS**: [Task IDs]
+- **DEPENDS_ON**: [Task 1.x]
+- **BLOCKS**: [IDs]
 - **PROVIDES**: [What it delivers]
-- **IMPLEMENT**: {Details}
-- **PATTERN**: {Reference}
+- **IMPLEMENT**: [Details]
 - **USES_FROM_WAVE_1**: Task 1.1 provides [X], Task 1.2 provides [Y]
-- **VALIDATE**: `{command}`
-- **INTEGRATION_TEST**: `{command with Wave 2 peers}`
+- **VALIDATE**: `[command]`
 
-#### Task 2.2: {ACTION} {target_file}
-
-- **WAVE**: 2
-- **AGENT_ROLE**: [role]
-- **DEPENDS_ON**: [Task 1.3]
-- **BLOCKS**: [Task IDs]
-- **PROVIDES**: [What it delivers]
-- **IMPLEMENT**: {Details}
-- **VALIDATE**: `{command}`
-
-**Wave 2 Integration Checkpoint:**
-```bash
-# Run after ALL Wave 2 tasks complete
-[integration test command]
-```
+**Wave 2 Checkpoint:** `[integration test]`
 
 ---
 
-### WAVE 3: Integration Layer (Sequential)
+### WAVE 3: Integration (Sequential)
 
-**Prerequisites:** All Wave 2 tasks complete
-
-#### Task 3.1: {ACTION} {target_file}
+#### Task 3.1: {ACTION} {target}
 
 - **WAVE**: 3
-- **AGENT_ROLE**: [integration-specialist]
-- **DEPENDS_ON**: [Task 2.1, Task 2.2]
+- **AGENT_ROLE**: integration-specialist
+- **DEPENDS_ON**: [Task 2.x]
 - **BLOCKS**: []
-- **PROVIDES**: [Final integrated feature]
-- **IMPLEMENT**: {Integration logic}
-- **VALIDATE**: `{command}`
-- **INTEGRATION_TEST**: `{end-to-end test}`
+- **PROVIDES**: Final integrated feature
+- **IMPLEMENT**: [Integration logic]
+- **VALIDATE**: `[end-to-end test]`
 
-**Final Integration Checkpoint:**
-```bash
-# Verifies entire feature works end-to-end
-[full feature test command]
-```
-
-<Continue with additional tasks organized by wave...>
+**Final Checkpoint:** `[full feature test]`
 
 ---
 
 ## TESTING STRATEGY
 
-<Define testing approach based on project's test framework and patterns discovered during research>
+**⚠️ CRITICAL: Plan for MAXIMUM test automation**
+
+Attempt to automate as many tests as possible. Clearly mark automated vs manual tests.
+
+### Test Automation Requirements
+
+For EACH test, specify:
+1. **Test Type**: Unit/Integration/E2E/Visual/Performance
+2. **Automation Status**: ✅ Automated / ⚠️ Manual / 🔄 Semi-Automated
+3. **Tool/Framework**: pytest, Playwright MCP, Selenium, Cypress, Jest, etc.
+4. **Test Location**: Where test files created
+5. **Execution Command**: How to run
+6. **Manual Explanation**: If manual, WHY not automated (brief)
+
+**Automation Preference:** Fully Automated ✅ → Semi-Automated 🔄 → Manual ⚠️ (last resort)
+
+**Available Tools:** pytest, Jest, Playwright MCP, Cypress, Selenium, Testing Library, Postman CLI, Lighthouse, k6, MCP servers
 
 ### Unit Tests
 
-<Scope and requirements based on project standards>
-
-Design unit tests with fixtures and assertions following existing testing approaches
+**Automation**: ✅ Fully Automated
+**Tool**: [pytest, Jest, unittest]
+**Location**: [tests/unit/, src/**/*.test.ts]
+**Execution**: `[command]`
 
 ### Integration Tests
 
-<Scope and requirements based on project standards>
+**Automation**: ✅ Fully Automated
+**Tool**: [pytest, Playwright MCP]
+**Location**: [tests/integration/]
+**Execution**: `[command]`
 
-### Tool Registration Tests (If Applicable)
+### End-to-End Tests
 
-**When**: Creating tools with decorators like `@agent.tool`, `@mcp.tool`, or similar registration patterns
+**Automation**: [✅ Automated / ⚠️ Manual - explain why]
+**Tool**: [Playwright MCP, Cypress, Manual]
+**Location**: [tests/e2e/]
 
-**Scope**: Tool registration, availability, and invocation
+If automated: E2E scenarios, workflows, automation approach
+**Execution**: `[command]`
 
-**Critical Tests Required**:
-1. **Tool Registration Test**: Verify tool is registered in the tool registry
-2. **Singleton Usage Test**: Verify endpoints/services use singleton instances with tools
-3. **E2E Invocation Test**: Verify tool can be invoked through standard interfaces
-4. **Tool Availability Test**: Verify tool is accessible in all required modes
+If manual:
+**Why Manual**: [Brief reason - e.g., "Requires hardware", "Third-party OAuth can't automate in test env"]
+**Steps**: [1. Step, 2. Step, 3. Expected]
 
-**Pattern to Follow** (adapt to your framework):
-```[language]
-# Test that tool is registered
-def test_tool_is_registered():
-    """Verify tool is registered in tool registry."""
-    registry = get_tool_registry()
-    assert "[your_tool_name]" in registry.list_tools()
+### Manual Tests (Only if automation not feasible)
 
-# Test that singleton pattern is used
-def test_service_uses_singleton():
-    """Verify service uses singleton instance with tools."""
-    from app.service import service_instance, singleton_instance
-    assert service_instance is singleton_instance
-
-# Test end-to-end invocation
-def test_tool_invocation():
-    """Verify tool can be invoked through standard interface."""
-    result = invoke_tool("[your_tool_name]", {"param": "value"})
-    assert result.success
-```
-
-**Common Pitfall**: Using factory functions creates instances WITHOUT tools. Always use singleton instances for tool-enabled services.
+#### Manual Test [#]: [Name]
+**Why Manual**: [Concise reason]
+**Frequency**: [When to run]
+**Steps**: [1, 2, 3]
+**Expected**: [Success criteria]
+**Time**: [estimate]
 
 ### Edge Cases
 
-<List specific edge cases that must be tested for this feature>
+**Automation**: [✅/⚠️/🔄]
+**Tool**: [tool]
+
+For each edge case:
+- **Test**: [Name]
+- **Scenario**: [What edge case]
+- **Automation**: ✅ [tool] / ⚠️ Manual because [reason]
+- **Execution**: `[command]` or [manual steps]
+
+### Test Automation Summary
+
+**Total Tests**: [#]
+- ✅ **Automated**: [#] ([%]%)
+  - Unit: [#] via [tool]
+  - Integration: [#] via [tool]
+  - E2E: [#] via [tool]
+- ⚠️ **Manual**: [#] ([%]%) - [brief reasons]
+
+**Goal**: 80%+ automated coverage
+
+**Execution Agent Instructions**:
+- CREATE all automated test files during implementation
+- UPDATE automated tests as part of tasks
+- RUN automated tests after each validation
+- DOCUMENT manual test results in execution report
 
 ---
 
 ## VALIDATION COMMANDS
 
-<Define validation commands based on project's tools discovered in Phase 2>
+Execute every command to ensure zero regressions and 100% correctness.
 
-Execute every command to ensure zero regressions and 100% feature correctness.
+### Level 0: External Service Validation (If Applicable - MUST PASS FIRST)
 
-### Level 0: External Service Validation (If Applicable - MUST PASS BEFORE OTHER VALIDATION)
+**CRITICAL:** Confirms external service setup working. If fails, feature is blocked.
 
-**CRITICAL:** This validation confirms that all external service setup from Phase 1 is working. If this fails, the entire feature is blocked.
+For each service:
 
-For each external API/service:
-
-#### [Service Name] Setup Validation
+#### [Service] Validation
 ```bash
-# Verify service account and credentials
-[command to check account access, API key validity]
+# Verify account/credentials
+[check account access, API key validity]
 
-# Test basic connectivity
-[command to test connection to service]
+# Test connectivity
+[connection test]
 
-# Verify required features are accessible
-[command to test specific feature availability - not just connection]
+# Verify required features
+[test specific features - not just connection]
 
-# Confirm rate limits and quotas
-[command to check current usage vs. limits]
+# Confirm rate limits
+[check usage vs limits]
 
-# Test actual integration pattern from research
-[command to execute POC test from research phase]
+# Test integration pattern
+[POC test from research]
 ```
 
-**Expected Output:**
-- Account Status: Active, accessible with credentials
-- Connection: Successful authentication, no errors
-- Feature Availability: [Specific features] confirmed accessible
-- Rate Limits: [X requests/min] available, sufficient for our needs
-- Integration Pattern: [Expected response format from research]
-
-**If Failed:**
-- **Account/Credentials:** Check API key, account status, regenerate if needed
-- **Connection:** Check network, firewall, service status page
-- **Feature Unavailable:** Check API tier/plan, contact support, or find alternative
-- **Rate Limits:** Upgrade plan, implement caching, or redesign approach
-- **Integration Pattern:** Review research doc, check API version, update implementation
-
-**Fallback Strategy:**
-- If blocking issue: Document problem and STOP execution
-- If configuration issue: Fix and retry
-- If fundamental limitation: Update plan with alternative approach OR escalate to user
-
-**DO NOT PROCEED TO LEVEL 1+ VALIDATION UNTIL ALL SERVICES PASS**
+**Expected:** Account active, connection successful, features accessible, rate limits sufficient
+**If Failed:** Check credentials, network, service status; upgrade plan; redesign; or STOP and escalate
+**DO NOT PROCEED TO LEVEL 1+ UNTIL ALL SERVICES PASS**
 
 ### Level 1: Syntax & Style
 
-<Project-specific linting and formatting commands>
+[Project linting/formatting commands]
 
 ### Level 2: Unit Tests
 
-<Project-specific unit test commands>
+[Unit test commands]
 
 ### Level 3: Integration Tests
 
-<Project-specific integration test commands>
+[Integration test commands]
 
 ### Level 4: Manual Validation
 
-<Feature-specific manual testing steps - API calls, UI testing, etc.>
+[Feature-specific manual testing - API calls, UI testing]
 
-### Level 5: Additional Validation (Optional)
+### Level 5: Additional (Optional)
 
-<MCP servers or additional CLI tools if available>
+[MCP servers or additional tools]
 
 ---
 
 ## ACCEPTANCE CRITERIA
 
-<List specific, measurable criteria that must be met for completion>
-
 - [ ] **External Services (if applicable):**
-  - [ ] All external service accounts created and accessible
-  - [ ] All API keys/credentials generated and stored securely
-  - [ ] All required external features verified as available
-  - [ ] All external service integration tests passing
-  - [ ] Rate limits confirmed as sufficient
-  - [ ] External service setup documented
+  - [ ] All accounts created, accessible, features verified
+  - [ ] API keys stored securely, rate limits sufficient
+  - [ ] Integration tests passing, setup documented
 - [ ] Feature implements all specified functionality
-- [ ] All validation commands pass with zero errors (including Level 0 external service validation)
-- [ ] Unit test coverage meets requirements (80%+)
+- [ ] All validation commands pass (including Level 0)
+- [ ] Unit test coverage 80%+
 - [ ] Integration tests verify end-to-end workflows
-- [ ] Code follows project conventions and patterns
-- [ ] No regressions in existing functionality
-- [ ] Documentation is updated (if applicable)
-- [ ] Performance meets requirements (if applicable)
-- [ ] Security considerations addressed (if applicable)
+- [ ] Code follows project conventions
+- [ ] No regressions
+- [ ] Documentation updated (if applicable)
+- [ ] Performance/security addressed (if applicable)
 
 ---
 
 ## COMPLETION CHECKLIST
 
 - [ ] **Phase 1 External Service Verification (if applicable):**
-  - [ ] All external services set up and verified BEFORE other implementation
-  - [ ] External service validation (Level 0) passes
-  - [ ] No blockers from external service limitations
-- [ ] All tasks completed in order (respecting wave dependencies)
-- [ ] Each task validation passed immediately
-- [ ] All validation commands executed successfully (Levels 0-5)
-- [ ] Full test suite passes (unit + integration)
-- [ ] No linting or type checking errors
-- [ ] Manual testing confirms feature works
-- [ ] Acceptance criteria all met
-- [ ] Code reviewed for quality and maintainability
+  - [ ] Services set up and verified BEFORE implementation
+  - [ ] Level 0 validation passes
+  - [ ] No blockers from service limitations
+- [ ] All tasks completed in wave order
+- [ ] Each task validation passed
+- [ ] All validation commands executed (Levels 0-5)
+- [ ] **Test Automation:**
+  - [ ] All automated tests created and passing
+  - [ ] 80%+ automated coverage achieved
+  - [ ] Manual tests documented with clear instructions
+- [ ] Full test suite passes (unit + integration + E2E)
+- [ ] No linting/type errors
+- [ ] Manual testing completed (if any manual tests)
+- [ ] All acceptance criteria met
+- [ ] Code reviewed for quality
+- [ ] **⚠️ CRITICAL: Changes left UNSTAGED (NOT committed) for user review**
 
 ---
 
 ## NOTES
 
-<Additional context, design decisions, trade-offs>
+[Additional context, design decisions, trade-offs]
 ```
 
 ## Output Format
 
 **Filename**: `.agents/plans/{kebab-case-descriptive-name}.md`
-
-- Replace `{kebab-case-descriptive-name}` with short, descriptive feature name
-- Examples: `add-user-authentication.md`, `implement-search-api.md`, `refactor-database-layer.md`
-
-**Directory**: Create `.agents/plans/` if it doesn't exist
+**Directory**: Create `.agents/plans/` if doesn't exist
 
 ---
 
 ## POST-PLANNING VERIFICATION
-
-### Save and Verify Line Count
 
 **REQUIRED STEPS AFTER CREATING PLAN:**
 
@@ -1092,109 +687,105 @@ mkdir -p .agents/plans
 # CRITICAL: Verify line count is 500-700 lines
 wc -l .agents/plans/[feature-name].md
 
-# If not in range, adjust the plan NOW before reporting to user
+# If not in range, adjust NOW
 ```
 
-**Line Count Adjustment**:
-- If < 500 lines: Add more examples, edge cases, validation details, or expand on patterns
-- If > 700 lines: Consolidate tasks, remove redundant explanations, trim verbose sections, use more concise language
+**Line Count Adjustment:**
+- If < 500: Add examples, edge cases, validation details
+- If > 700: Consolidate tasks, remove redundancy, use concise language
 
-**Final Checklist**:
-- [ ] Plan is 500-700 lines (VERIFY with `wc -l` - this is MANDATORY)
+**Final Checklist:**
+- [ ] **All ambiguities resolved using AskUserQuestion**
+- [ ] **Plan written to `.agents/plans/[feature-name].md` (NOT CLI)**
+- [ ] Plan is 500-700 lines (VERIFY with `wc -l` - MANDATORY)
 - [ ] Feature name is kebab-case
-- [ ] File paths are exact and correct
-- [ ] Validation commands are copy-pasteable and executable
-- [ ] Code examples are from actual codebase (not generic)
-- [ ] Tasks are in dependency order
-- [ ] Another agent could execute without conversation context
-- [ ] All patterns reference specific file:line numbers
-- [ ] **Tasks organized into parallel execution waves**
-- [ ] **Each task has WAVE, DEPENDS_ON, and AGENT_ROLE metadata**
-- [ ] **Interface contracts defined between dependent tasks**
-- [ ] **Integration checkpoints specified for each wave**
-- [ ] **Shared context structure documented**
-- [ ] **At least 30% of tasks can execute in parallel** (or explain why not)
+- [ ] File paths exact and correct
+- [ ] Validation commands executable
+- [ ] Code examples from actual codebase
+- [ ] Tasks in dependency order
+- [ ] Another agent could execute without context
+- [ ] Patterns reference specific file:line
+- [ ] **Tasks in parallel execution waves**
+- [ ] **Each task has WAVE, DEPENDS_ON, AGENT_ROLE**
+- [ ] **Interface contracts defined**
+- [ ] **Integration checkpoints specified**
+- [ ] **30%+ tasks can execute in parallel** (or explain why not)
+- [ ] **Test Automation Planned:**
+  - [ ] Every test marked ✅/⚠️/🔄
+  - [ ] Automated tests specify tool (pytest, Playwright MCP, etc.)
+  - [ ] Automated tests include execution commands
+  - [ ] Manual tests explain why not automated (brief)
+  - [ ] Test summary with percentages
+  - [ ] 80%+ automated coverage targeted
 - [ ] **External Service Setup (if applicable):**
-  - [ ] Phase 1 Task 1.1 is external service setup and verification
-  - [ ] All required external services identified
-  - [ ] Setup steps documented (account creation, API keys, configuration)
+  - [ ] Phase 1 Task 1.1 is service setup/verification
+  - [ ] All services identified, setup documented
   - [ ] Verification tests defined with expected outputs
-  - [ ] Fallback strategy documented if verification fails
-  - [ ] Level 0 validation includes external service checks
-  - [ ] Acceptance criteria includes external service verification
+  - [ ] Fallback strategy documented
+  - [ ] Level 0 validation includes service checks
 
 ---
 
 ## Quality Criteria
 
 ### Context Completeness ✓
-
-- [ ] All necessary patterns identified and documented
+- [ ] All necessary patterns identified
 - [ ] External library usage documented with links
-- [ ] Integration points clearly mapped
+- [ ] Integration points mapped
 - [ ] Gotchas and anti-patterns captured
-- [ ] Every task has executable validation command
+- [ ] Every task has executable validation
 
 ### Implementation Ready ✓
-
-- [ ] Another developer could execute without additional context
-- [ ] Tasks ordered by dependency (can execute top-to-bottom)
-- [ ] Each task is atomic and independently testable
-- [ ] Pattern references include specific file:line numbers
+- [ ] Another developer could execute without context
+- [ ] Tasks ordered by dependency
+- [ ] Each task atomic and testable
+- [ ] Pattern references include file:line
 
 ### Parallel Execution Ready ✓
+- [ ] Tasks in execution waves
+- [ ] Dependencies documented
+- [ ] Interface contracts defined
+- [ ] Checkpoints identified
+- [ ] Agent roles assigned
+- [ ] Integration tests per wave
 
-- [ ] Tasks organized into execution waves
-- [ ] Dependencies between tasks explicitly documented
-- [ ] Interface contracts defined for cross-task communication
-- [ ] Synchronization checkpoints identified
-- [ ] Shared context structure documented
-- [ ] Agent role assignments suggested
-- [ ] Mock strategies provided for blocked parallel work
-- [ ] Integration tests defined for each wave
+### External Service Ready ✓ (If Applicable)
+- [ ] All APIs/services identified
+- [ ] Feasibility/allowability verified
+- [ ] Setup requirements documented
+- [ ] Phase 1 Task 1.1 is service setup
+- [ ] Verification tests with success outputs
+- [ ] Fallback strategy documented
+- [ ] Level 0 validation includes services
 
-### External Service Integration Ready ✓ (If Applicable)
-
-- [ ] All external APIs/services identified during research
-- [ ] Feasibility verified (features are technically possible)
-- [ ] Allowability verified (permitted by ToS, rate limits, pricing tier)
-- [ ] Setup requirements fully documented (accounts, keys, config)
-- [ ] Phase 1 Task 1.1 is external service setup and verification
-- [ ] Verification tests defined with expected success outputs
-- [ ] Fallback strategy documented if verification fails
-- [ ] Level 0 validation includes external service checks
-- [ ] External services marked as BLOCKER dependencies for dependent tasks
+### Test Automation Planning ✓
+- [ ] Every test categorized (✅/⚠️/🔄)
+- [ ] Automated tests specify tool
+- [ ] Automated tests include commands
+- [ ] Manual tests explain why
+- [ ] Test summary with percentages
+- [ ] 80%+ coverage goal
+- [ ] Execution agent has clear test instructions
 
 ### Pattern Consistency ✓
-
-- [ ] Tasks follow existing codebase conventions
-- [ ] New patterns justified with clear rationale
-- [ ] No reinvention of existing patterns or utils
-- [ ] Testing approach matches project standards
+- [ ] Follows codebase conventions
+- [ ] New patterns justified
+- [ ] No reinvention of existing patterns
+- [ ] Testing matches project standards
 
 ### Information Density ✓
-
-- [ ] No generic references (all specific and actionable)
-- [ ] URLs include section anchors when applicable
-- [ ] Task descriptions use codebase keywords
-- [ ] Validation commands are non-interactive and executable
-- [ ] Plan length is 500-700 lines maximum (concise but complete)
-
-## Success Metrics
-
-**One-Pass Implementation**: Execution agent can complete feature without additional research or clarification
-
-**Validation Complete**: Every task has at least one working validation command
-
-**Context Rich**: The Plan passes "No Prior Knowledge Test" - someone unfamiliar with codebase can implement using only Plan content
-
-**Confidence Score**: #/10 that execution will succeed on first attempt
+- [ ] No generic references (all specific)
+- [ ] URLs include section anchors
+- [ ] Validation commands non-interactive
+- [ ] Plan length 500-700 lines (concise)
 
 ---
 
 ## FINAL REPORT
 
-After creating the plan, output this report to the user and STOP (do not execute):
+After creating the plan, output this report and STOP (do not execute):
+
+**REMINDER: Full plan content is in the file, NOT this message**
 
 ```
 ✅ Plan Created Successfully
@@ -1203,7 +794,7 @@ After creating the plan, output this report to the user and STOP (do not execute
 
 📋 Feature: [Feature name]
 📄 Plan Location: .agents/plans/[feature-name].md
-📏 Plan Length: [XXX] lines (target: 500-700 lines)
+📏 Plan Length: [XXX] lines (target: 500-700)
 ⚡ Complexity: [Low/Medium/High]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1212,20 +803,28 @@ After creating the plan, output this report to the user and STOP (do not execute
 [2-3 sentence summary of feature and approach]
 
 ⚡ Parallel Execution:
-- Waves: [Number] execution waves
-- Parallelization: [Number] tasks can run concurrently
+- Waves: [#] execution waves
+- Parallelization: [#] tasks concurrent
 - Max Speedup: [X]x with [N] parallel agents
-- Sequential Tasks: [Number] must run sequentially
+- Sequential: [#] must run sequentially
+
+🧪 Test Automation:
+- Total: [#] tests
+- Automated: [#] ([XX]%) - using [tools: pytest, Playwright MCP, etc.]
+- Manual: [#] ([XX]%) - [brief reason if >20%]
+- Goal: 80%+ [✅ Met / ⚠️ [XX]% - explain]
 
 ⚠️  Key Risks:
-[List 2-4 key risks with mitigations]
+[2-4 risks with mitigations]
 
-🔍 Similar Features Found:
-[List similar features that were used as patterns, or "None - new pattern"]
+🔍 Similar Features:
+[Features used as patterns, or "None - new pattern"]
 
-📊 Estimated Tasks: [Number] total ([X] parallel, [Y] sequential)
-🎯 Confidence Score: [X]/10 for one-pass success
-👥 Recommended Team Size: [Number] agents for optimal parallelization
+❓ User Questions: [# of AskUserQuestion calls, or "None - clear"]
+
+📊 Tasks: [#] total ([X] parallel, [Y] sequential)
+🎯 Confidence: [X]/10 for one-pass success
+👥 Team Size: [#] agents for optimal parallelization
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
