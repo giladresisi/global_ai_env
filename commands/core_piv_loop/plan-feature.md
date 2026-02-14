@@ -18,6 +18,8 @@ This command creates a plan file only. After the plan is created:
 
 When this plan is executed, the execution agent MUST:
 - Make ALL code changes required by the plan
+- Delete any debug logs added during execution (console.log, print statements, etc.) that were NOT explicitly requested
+- Keep pre-existing debug logs that were already in the codebase
 - Leave ALL changes UNSTAGED (do NOT commit)
 - Allow the user to review changes with `git diff` before committing
 - This instruction will be included in every plan file generated
@@ -215,6 +217,8 @@ Determine:
 
 **⚠️ CRITICAL - DO NOT COMMIT CHANGES:**
 - Implement ALL changes required by this plan
+- Delete any debug logs you added during execution (console.log, print, etc.) that were NOT explicitly requested
+- Keep pre-existing debug logs that were already in the codebase
 - Leave ALL changes UNSTAGED (do NOT run git add or git commit)
 - User will review changes with `git diff` before committing
 - Only make code changes - no git operations
@@ -660,6 +664,7 @@ For each service:
 - [ ] Manual testing completed (if any manual tests)
 - [ ] All acceptance criteria met
 - [ ] Code reviewed for quality
+- [ ] **⚠️ Debug logs added during execution REMOVED (keep pre-existing logs only)**
 - [ ] **⚠️ CRITICAL: Changes left UNSTAGED (NOT committed) for user review**
 
 ---
