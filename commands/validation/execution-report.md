@@ -25,57 +25,147 @@ You have just finished implementing a feature. Before moving on, reflect on:
 
 ## Generate Report
 
-**CRITICAL: Append report to PROGRESS.md, NOT a separate file**
+**CRITICAL: Create report in `.agents/execution-reports/` folder**
 
-Add a new section to PROGRESS.md under the current feature:
+### Step 1: Determine Feature Name
 
-**Append this section to PROGRESS.md:**
+Extract the feature/module name from PROGRESS.md or the plan file path.
+Example: "module-5-multi-format-enhancement" from plan path `.agents/plans/module-5-multi-format-enhancement.md`
+
+### Step 2: Create Detailed Execution Report
+
+**Create file:** `.agents/execution-reports/{feature-name}.md`
+
+**Use Write tool to create this file with the following structure:**
 
 ```markdown
+# Execution Report: [Feature Name]
+
+**Date:** [Current date]
+**Plan:** [path to plan file]
+**Executor:** [team-based/sequential/etc]
+**Outcome:** ✅ Success / ⚠️ Partial / ❌ Failed
+
 ---
 
-### Execution Report
-**Generated**: [Current date/time]
+## Executive Summary
 
-#### Meta Information
-- Plan file: [path to plan that guided this implementation]
-- Files added: [list with paths]
-- Files modified: [list with paths]
-- Lines changed: +X -Y
+[2-3 sentence summary of what was implemented and outcome]
 
-#### Validation Results
-- Syntax & Linting: ✓/✗ [details if failed]
-- Type Checking: ✓/✗ [details if failed]
-- Unit Tests: ✓/✗ [X passed, Y failed]
-- Integration Tests: ✓/✗ [X passed, Y failed]
+**Key Metrics:**
+- **Tasks Completed:** X/Y (Z%)
+- **Tests Added:** X
+- **Test Pass Rate:** X/Y (Z%)
+- **Files Modified:** X
+- **Lines Changed:** +X/-Y
+- **Execution Time:** ~X minutes
+- **Alignment Score:** X/10
 
-#### What Went Well
-List specific things that worked smoothly:
-- [concrete examples]
+---
 
-#### Challenges Encountered
-List specific difficulties:
-- [what was difficult and why]
+## Implementation Summary
 
-#### Divergences from Plan
-For each divergence, document:
+[Detailed breakdown of what was implemented, organized by phase/wave/category]
 
-**[Divergence Title]**
-- Planned: [what the plan specified]
-- Actual: [what was implemented instead]
-- Reason: [why this divergence occurred]
-- Type: [Better approach found | Plan assumption wrong | Security concern | Performance issue | Other]
+---
 
-#### Skipped Items
-List anything from the plan that was not implemented:
-- [what was skipped]
-- Reason: [why it was skipped]
+## Divergences from Plan
 
-#### Recommendations
-Based on this implementation, what should change for next time?
-- Plan command improvements: [suggestions]
-- Execute command improvements: [suggestions]
-- CLAUDE.md additions: [suggestions]
+### Divergence #1: [Title]
+
+**Classification:** ✅ GOOD / ❌ BAD / ⚠️ ENVIRONMENTAL
+
+**Planned:** [what plan specified]
+**Actual:** [what was implemented]
+**Reason:** [why divergence occurred]
+**Root Cause:** [plan gap, environmental, framework behavior, etc]
+**Impact:** [positive/negative/neutral - describe]
+**Justified:** Yes/No
+
+[Repeat for each divergence]
+
+---
+
+## Test Results
+
+**Tests Added:** [list with descriptions]
+**Test Execution:** [show test output summary]
+**Pass Rate:** X/Y (Z%)
+
+---
+
+## Validation Results
+
+| Level | Command | Status | Notes |
+|-------|---------|--------|-------|
+| 1 | [command] | ✅/❌ | [notes] |
+| 2 | [command] | ✅/❌ | [notes] |
+
+---
+
+## Challenges & Resolutions
+
+**Challenge 1:** [description]
+- **Issue:** [what went wrong]
+- **Root Cause:** [why it happened]
+- **Resolution:** [how it was fixed]
+- **Time Lost:** [estimate]
+- **Prevention:** [how to avoid in future]
+
+[Repeat for each challenge]
+
+---
+
+## Files Modified
+
+**[Category] (X files):**
+- `path/to/file1` - [description] (+X/-Y)
+- `path/to/file2` - [description] (+X/-Y)
+
+**Total:** X insertions(+), Y deletions(-)
+
+---
+
+## Success Criteria Met
+
+- [x] Criterion 1
+- [x] Criterion 2
+- [ ] Criterion 3 (deferred/skipped)
+
+---
+
+## Recommendations for Future
+
+**Plan Improvements:**
+- [specific suggestions]
+
+**Process Improvements:**
+- [specific suggestions]
+
+**CLAUDE.md Updates:**
+- [specific patterns to document]
+
+---
+
+## Conclusion
+
+**Overall Assessment:** [summary paragraph]
+**Alignment Score:** X/10 - [rationale]
+**Ready for Production:** Yes/No - [reasoning]
 ```
 
-**Use Edit tool to append to PROGRESS.md for the current feature section.**
+### Step 3: Update PROGRESS.md
+
+**Use Edit tool to add/update in PROGRESS.md under the current feature:**
+
+```markdown
+### Reports Generated
+
+**Execution Report:** `.agents/execution-reports/{feature-name}.md`
+- Detailed implementation summary
+- Divergences and resolutions
+- Test results and metrics
+- Team performance analysis (if applicable)
+```
+
+**Do NOT include the full report content in PROGRESS.md - only the reference.**

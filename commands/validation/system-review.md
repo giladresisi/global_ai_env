@@ -112,96 +112,170 @@ Based on patterns across divergences, suggest:
 
 ## Output Format
 
-**CRITICAL: Append review to PROGRESS.md, NOT a separate file**
+**CRITICAL: Create review in `.agents/system-reviews/` folder**
 
-Add a new section to PROGRESS.md under the current feature:
+### Step 1: Determine Feature Name
+
+Extract the feature/module name from PROGRESS.md or the execution report.
+Example: "module-5-multi-format-enhancement" from execution report path
+
+### Step 2: Create Detailed System Review
+
+**Create file:** `.agents/system-reviews/{feature-name}.md`
+
+**Use Write tool to create this file with the following structure:**
 
 ```markdown
----
+# System Review: [Feature Name]
 
-### System Review
-**Generated**: [Current date/time]
+**Generated:** [Current date/time]
 
-#### Meta Information
-- Plan reviewed: [path from PROGRESS.md]
-- Execution report: PROGRESS.md (this file)
+## Meta Information
+- Plan reviewed: [path to plan file]
+- Execution report: `.agents/execution-reports/{feature-name}.md`
+- Executor: [team-based/sequential/etc]
 - Date: [current date]
-```
 
-### Report Structure:
+## Overall Alignment Score: X/10
 
-#### Overall Alignment Score: \_\_/10
+**Scoring rationale:**
+- [breakdown of scoring]
 
-Scoring guide:
+[Summary paragraph explaining overall alignment]
 
-- 10: Perfect adherence, all divergences justified
-- 7-9: Minor justified divergences
-- 4-6: Mix of justified and problematic divergences
-- 1-3: Major problematic divergences
+## Divergence Analysis
 
-#### Divergence Analysis
-
-For each divergence from the execution report:
-
+### Divergence 1: [Title]
 ```yaml
 divergence: [what changed]
 planned: [what plan specified]
 actual: [what was implemented]
 reason: [agent's stated reason from report]
-classification: good ✅ | bad ❌
+classification: good ✅ | bad ❌ | environmental ⚠️
 justified: yes/no
 root_cause: [unclear plan | missing context | etc]
+impact: [describe impact]
 ```
 
-#### Pattern Compliance
+**Assessment:** [detailed analysis of this divergence]
 
-Assess adherence to documented patterns:
+[Repeat for each divergence]
 
-- [ ] Followed codebase architecture
-- [ ] Used documented patterns (from CLAUDE.md)
-- [ ] Applied testing patterns correctly
-- [ ] Met validation requirements
+## Pattern Compliance
 
-#### System Improvement Actions
+- ✅/❌ Followed codebase architecture (details)
+- ✅/❌ Used documented patterns (from CLAUDE.md) (details)
+- ✅/❌ Applied testing patterns correctly (details)
+- ✅/❌ Met validation requirements (details)
 
-Based on analysis, recommend specific actions:
+**Exemplary/Concerning:** [highlight notable observations]
 
-**Update CLAUDE.md:**
+## System Improvement Actions
 
-- [ ] Document [pattern X] discovered during implementation
-- [ ] Add anti-pattern warning for [Y]
-- [ ] Clarify [technology constraint Z]
+### Update CLAUDE.md:
 
-**Update Plan Command ($1):**
+- [x]/[ ] Document [pattern X] discovered during implementation:
+  ```markdown
+  [Actual suggested text to add]
+  ```
 
-- [ ] Add instruction for [missing step]
-- [ ] Clarify [ambiguous instruction]
-- [ ] Add validation requirement for [X]
+- [x]/[ ] Add anti-pattern warning for [Y]:
+  ```markdown
+  [Actual suggested text to add]
+  ```
 
-**Create New Command:**
+### Update [command-name] command:
 
-- [ ] `/[command-name]` for [manual process repeated 3+ times]
+- [ ] Add [specific instruction]:
+  ```markdown
+  [Actual suggested text to add]
+  ```
 
-**Update Execute Command ($3):**
+### Create New Command:
 
-- [ ] Add [validation step] to execution checklist
+- [ ] `/[command-name]` for [manual process]
+  - [Description of command purpose]
 
-#### Key Learnings
+## Key Learnings
 
-**What worked well:**
+### What worked well:
 
-- [specific things that went smoothly]
+1. **[Category]:** [specific observation]
+2. **[Category]:** [specific observation]
 
-**What needs improvement:**
+### What needs improvement:
 
-- [specific process gaps identified]
+1. **[Category]:** [specific gap identified]
+2. **[Category]:** [specific gap identified]
 
-**For next implementation:**
+### For next implementation:
 
-- [concrete improvements to try]
+1. **[Action]:** [concrete improvement to try]
+2. **[Action]:** [concrete improvement to try]
+
+## Process Quality Assessment
+
+**Planning Phase:** ✅/⚠️/❌ [Rating]
+- [observations and details]
+
+**Execution Phase:** ✅/⚠️/❌ [Rating]
+- [observations and details]
+
+**Validation Phase:** ✅/⚠️/❌ [Rating]
+- [observations and details]
+
+**Documentation:** ✅/⚠️/❌ [Rating]
+- [observations and details]
+
+## Recommended CLAUDE.md Additions
+
+Based on patterns discovered during this implementation, add these sections:
+
+### 1. [Pattern Category]
+```markdown
+[Complete markdown text to add to CLAUDE.md]
 ```
 
-**Use Edit tool to append to PROGRESS.md for the current feature section.**
+### 2. [Pattern Category]
+```markdown
+[Complete markdown text to add to CLAUDE.md]
+```
+
+---
+
+## Conclusion
+
+**Overall Assessment:** [comprehensive summary]
+
+**Process Improvements Identified:**
+- [improvement 1] ✅/[ ] (status)
+- [improvement 2] ✅/[ ] (status)
+
+**Recommended Actions:**
+1. [action with priority]
+2. [action with priority]
+
+**Ready for Next Module:** Yes/No - [reasoning]
+```
+
+### Step 3: Update PROGRESS.md
+
+**Use Edit tool to add/update in PROGRESS.md under the current feature:**
+
+```markdown
+### Reports Generated
+
+**Execution Report:** `.agents/execution-reports/{feature-name}.md`
+- [Brief summary of execution report]
+
+**System Review:** `.agents/system-reviews/{feature-name}.md`
+- Alignment score: X/10
+- Divergence analysis (X identified: Y justified, Z problematic)
+- Process improvements and CLAUDE.md updates [completed/recommended]
+- Key learnings and recommendations for next implementation
+```
+
+**Do NOT include the full review content in PROGRESS.md - only the reference.**
 
 ## Important
 
