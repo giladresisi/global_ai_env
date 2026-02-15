@@ -15,58 +15,67 @@ You have just finished implementing a feature. Before moving on, reflect on:
 - What challenges you encountered
 - What diverged and why
 
+## Step 1: Read PROGRESS.md
+
+**MANDATORY FIRST STEP:**
+
+1. Read `PROGRESS.md` to find the execution phase notes for this feature
+2. Review what was accomplished and what's left to do
+3. Use this context to inform your execution report
+
 ## Generate Report
 
-Save to: `.agents/execution-reports/[feature-name].md`
+**CRITICAL: Append report to PROGRESS.md, NOT a separate file**
 
-### Meta Information
+Add a new section to PROGRESS.md under the current feature:
 
+**Append this section to PROGRESS.md:**
+
+```markdown
+---
+
+### Execution Report
+**Generated**: [Current date/time]
+
+#### Meta Information
 - Plan file: [path to plan that guided this implementation]
 - Files added: [list with paths]
 - Files modified: [list with paths]
 - Lines changed: +X -Y
 
-### Validation Results
-
+#### Validation Results
 - Syntax & Linting: ✓/✗ [details if failed]
 - Type Checking: ✓/✗ [details if failed]
 - Unit Tests: ✓/✗ [X passed, Y failed]
 - Integration Tests: ✓/✗ [X passed, Y failed]
 
-### What Went Well
-
+#### What Went Well
 List specific things that worked smoothly:
-
 - [concrete examples]
 
-### Challenges Encountered
-
+#### Challenges Encountered
 List specific difficulties:
-
 - [what was difficult and why]
 
-### Divergences from Plan
-
+#### Divergences from Plan
 For each divergence, document:
 
 **[Divergence Title]**
-
 - Planned: [what the plan specified]
 - Actual: [what was implemented instead]
 - Reason: [why this divergence occurred]
 - Type: [Better approach found | Plan assumption wrong | Security concern | Performance issue | Other]
 
-### Skipped Items
-
+#### Skipped Items
 List anything from the plan that was not implemented:
-
 - [what was skipped]
 - Reason: [why it was skipped]
 
-### Recommendations
-
+#### Recommendations
 Based on this implementation, what should change for next time?
-
 - Plan command improvements: [suggestions]
 - Execute command improvements: [suggestions]
 - CLAUDE.md additions: [suggestions]
+```
+
+**Use Edit tool to append to PROGRESS.md for the current feature section.**

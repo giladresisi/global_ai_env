@@ -25,7 +25,13 @@ Perform a meta-level analysis of how well the implementation followed the plan a
 
 ## Context & Inputs
 
-You will analyze four key artifacts:
+You will analyze key artifacts:
+
+**PROGRESS.md:**
+Read this to find all notes for the current feature including:
+- Planning phase notes
+- Execution phase notes
+- Execution report (what was actually done and why)
 
 **Plan Command:**
 Read this to understand the planning process and what instructions guide plan creation.
@@ -33,21 +39,26 @@ Read this to understand the planning process and what instructions guide plan cr
 
 **Generated Plan:**
 Read this to understand what the agent was SUPPOSED to do.
-Plan file: $1
+Look up plan file location from PROGRESS.md
 
 **Execute Command:**
 Read this to understand the execution process and what instructions guide implementation.
 .claude/commands/execute.md
 
-**Execution Report:**
-Read this to understand what the agent ACTUALLY did and why.
-Execution report: $2
-
 ## Analysis Workflow
+
+### Step 0: Read PROGRESS.md
+
+**MANDATORY FIRST STEP:**
+
+1. Read `PROGRESS.md` to find the feature being reviewed
+2. Extract the plan file location from planning phase notes
+3. Read the execution report section to understand what was actually done
+4. Use this context for the remaining analysis steps
 
 ### Step 1: Understand the Planned Approach
 
-Read the generated plan ($1) and extract:
+Read the generated plan (from PROGRESS.md reference) and extract:
 
 - What features were planned?
 - What architecture was specified?
@@ -56,7 +67,7 @@ Read the generated plan ($1) and extract:
 
 ### Step 2: Understand the Actual Implementation
 
-Read the execution report ($2) and extract:
+Read the execution report from PROGRESS.md and extract:
 
 - What was implemented?
 - What diverged from the plan?
@@ -101,15 +112,23 @@ Based on patterns across divergences, suggest:
 
 ## Output Format
 
-Save your analysis to: `.agents/system-reviews/[feature-name]-review.md`
+**CRITICAL: Append review to PROGRESS.md, NOT a separate file**
 
-### Report Structure:
+Add a new section to PROGRESS.md under the current feature:
+
+```markdown
+---
+
+### System Review
+**Generated**: [Current date/time]
 
 #### Meta Information
-
-- Plan reviewed: [path to $1]
-- Execution report: [path to $2]
+- Plan reviewed: [path from PROGRESS.md]
+- Execution report: PROGRESS.md (this file)
 - Date: [current date]
+```
+
+### Report Structure:
 
 #### Overall Alignment Score: \_\_/10
 
@@ -180,6 +199,9 @@ Based on analysis, recommend specific actions:
 **For next implementation:**
 
 - [concrete improvements to try]
+```
+
+**Use Edit tool to append to PROGRESS.md for the current feature section.**
 
 ## Important
 

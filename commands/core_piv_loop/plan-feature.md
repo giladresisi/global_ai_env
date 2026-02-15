@@ -41,6 +41,30 @@ When this plan is executed, the execution agent MUST:
 
 ## Feature: $ARGUMENTS
 
+## Step 0: Log Planning Start to PROGRESS.md
+
+**MANDATORY FIRST STEP - Before any planning work:**
+
+1. Create `PROGRESS.md` in project root if it doesn't exist
+2. Add entry documenting planning phase start:
+
+```markdown
+## Feature: [Feature Name]
+
+### Planning Phase
+**Status**: In Progress
+**Started**: [Current date/time]
+**Plan File**: .agents/plans/[feature-name].md
+
+Planning in progress...
+```
+
+**Use Write tool if PROGRESS.md doesn't exist, Edit tool if it does.**
+
+This creates a persistent record visible to future agents working on this feature.
+
+---
+
 ## Mission
 
 Transform a feature request into a **comprehensive implementation plan** through systematic codebase analysis, external research, and strategic planning.
