@@ -57,13 +57,10 @@ Use Bash to check for venv folders:
 
 For each venv folder found:
 1. Copy the entire folder to the target worktree
-2. Use appropriate copy command for the platform
+2. **CRITICAL: MUST use `cp -r` command (works on all platforms including Windows Git Bash)**
 
 ```bash
-# Windows (use robocopy for efficiency)
-robocopy venv ..\{branch-name}\venv /E /NFL /NDL /NJH /NJS /nc /ns /np
-
-# Unix/Mac
+# All platforms (Windows/Unix/Mac) - use cp -r
 cp -r venv ../{branch-name}/venv
 ```
 
