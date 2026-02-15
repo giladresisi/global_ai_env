@@ -24,18 +24,30 @@ When this plan is executed, the execution agent MUST:
 - Allow the user to review changes with `git diff` before committing
 - This instruction will be included in every plan file generated
 
-**⚠️ PLAN OUTPUT REQUIREMENT:**
+**⚠️ PLAN OUTPUT REQUIREMENT - CRITICAL:**
+
+**🚨 MANDATORY: Write plan to FILE ONLY - NEVER to CLI 🚨**
 
 **ALL plan content MUST be written to `.agents/plans/[feature-name].md` - NOT to the CLI**
-- Do NOT output the plan content as a message to the user
-- ONLY write the plan to the file using the Write or Edit tool
-- When updating an existing plan, use Edit tool to modify the file directly
+
+**PROHIBITED:**
+- ❌ Do NOT output the plan content as a message to the user
+- ❌ Do NOT write plan sections in your response text
+- ❌ Do NOT show the plan in markdown code blocks
+- ❌ Do NOT copy/paste plan content to CLI
+
+**REQUIRED:**
+- ✅ ONLY write the plan to the file using the Write or Edit tool
+- ✅ When updating an existing plan, use Edit tool to modify the file directly
+- ✅ Verify file was written successfully before proceeding
 
 **What to output to CLI:**
-- Summary of what you're planning
-- Questions using AskUserQuestion (if needed)
-- Confirmation that plan was saved and where
-- Final report (see FINAL REPORT section)
+- ✅ Summary of what you're planning (2-3 sentences, NOT the full plan)
+- ✅ Questions using AskUserQuestion (if needed)
+- ✅ Confirmation that plan was saved and where
+- ✅ Final report (see FINAL REPORT section)
+
+**Why this matters:** Plan files can be 500-700 lines. Outputting to CLI wastes tokens, context, and user time. The file is the source of truth.
 
 ---
 
@@ -700,8 +712,12 @@ For each service:
 
 ## Output Format
 
+**🚨 REMINDER: Write to FILE only - NOT to CLI 🚨**
+
 **Filename**: `.agents/plans/{kebab-case-descriptive-name}.md`
 **Directory**: Create `.agents/plans/` if doesn't exist
+
+**CRITICAL:** Use Write or Edit tool to create the plan file. Do NOT output plan content in your CLI response.
 
 ---
 
@@ -713,11 +729,19 @@ For each service:
 mkdir -p .agents/plans
 # Plan saved to: .agents/plans/[feature-name].md
 
+# CRITICAL: Verify file exists and was written
+test -f .agents/plans/[feature-name].md && echo "✅ Plan file created" || echo "❌ Plan file missing"
+
 # CRITICAL: Verify line count is 500-700 lines
 wc -l .agents/plans/[feature-name].md
 
 # If not in range, adjust NOW
 ```
+
+**🚨 VERIFICATION CHECKPOINT:**
+- [ ] **Plan written to FILE** (used Write or Edit tool, NOT CLI output)
+- [ ] **File exists** (verified with test -f)
+- [ ] **Line count verified** (500-700 lines)
 
 **Line Count Adjustment:**
 - If < 500: Add examples, edge cases, validation details
@@ -814,7 +838,9 @@ wc -l .agents/plans/[feature-name].md
 
 After creating the plan, output this report and STOP (do not execute):
 
-**REMINDER: Full plan content is in the file, NOT this message**
+**🚨 CRITICAL REMINDER: Full plan content is in the FILE, NOT this message 🚨**
+**Do NOT include plan sections, tasks, or implementation details in this report.**
+**This report should be a SUMMARY only (see below).**
 
 ```
 ✅ Plan Created Successfully
