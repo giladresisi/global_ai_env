@@ -32,22 +32,32 @@ The worktree will be created in the parent directory at `../{branch-name}`.
 
 ## Step 4: Copy .env Files
 
-Use Glob to find all .env files in:
-- Top-level: `.env`
-- Frontend: `frontend/.env`, `frontend/.env.local`, etc.
-- Backend: `backend/.env`, `backend/.env.local`, etc.
+Use Bash to check for and copy .env files (gitignored files are not found by Glob):
 
-For each .env file found:
-1. Use Bash to copy it to the corresponding location in the target worktree
-2. Example: If `backend/.env` exists, copy to `../{branch-name}/backend/.env`
+Check common .env file locations explicitly:
+- Top-level: `.env`
+- Frontend: `frontend/.env`, `frontend/.env.local`
+- Backend: `backend/.env`, `backend/.env.local`
+
+For each location, use `test -f` to check if the file exists, then copy it:
 
 ```bash
-# Windows
-copy backend\.env ..\{branch-name}\backend\.env
-
-# Unix/Mac
-cp backend/.env ../{branch-name}/backend/.env
+# Check and copy .env files
+for env_file in .env backend/.env frontend/.env backend/.env.local frontend/.env.local; do
+  if [ -f "$env_file" ]; then
+    target_dir=$(dirname "../{branch-name}/$env_file")
+    mkdir -p "$target_dir"
+    cp "$env_file" "../{branch-name}/$env_file"
+    echo "Copied $env_file"
+  fi
+done
 ```
+
+This approach:
+1. Checks each known .env location explicitly with `test -f`
+2. Creates target directory if needed with `mkdir -p`
+3. Copies only files that exist
+4. Works with gitignored files that Glob cannot see
 
 ## Step 5: Copy venv Folders
 
