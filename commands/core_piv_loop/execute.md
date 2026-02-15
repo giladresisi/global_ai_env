@@ -1,30 +1,5 @@
 # Execute: Implement from Plan
 
-## Step 0: Log Execution Start to PROGRESS.md
-
-**MANDATORY FIRST STEP - Before reading the plan:**
-
-1. Read `PROGRESS.md` to find the planning phase entry for this feature
-2. Update the entry to show execution phase has started:
-
-```markdown
-## Feature: [Feature Name]
-
-### Planning Phase
-**Status**: Complete
-**Plan File**: .agents/plans/[feature-name].md
-
-### Execution Phase
-**Status**: In Progress
-**Started**: [Current date/time]
-
-Executing implementation...
-```
-
-**This must be done BEFORE any execution work begins.**
-
----
-
 ## Plan to Execute
 
 Read plan file and execute all tasks according to the plan's specifications.
@@ -201,15 +176,78 @@ For EACH task in "Step by Step Tasks":
    - Confirm with user: "Plan doesn't specify tests. Should I add tests for [implemented features]?"
    - Wait for user response before proceeding
 
-4. **If manual actions required for automated testing:**
-   - **CRITICAL**: DO NOT complete execution saying tests couldn't run
-   - Instead, describe to the user what needs to be done
-   - Prompt the user: "Please complete [specific action] and notify me when done"
-   - WAIT for user confirmation
-   - THEN continue with automated testing
-   - The execution is NOT complete until all automated tests run successfully
-
 **DO NOT skip to validation without addressing test requirements.**
+
+### 2.8. MANDATORY: Pre-Validation User Action Check
+
+**CRITICAL:** Before running validation commands, check if the plan requires user actions that must be completed BEFORE tests can pass.
+
+**Check the plan for these blocking prerequisites:**
+
+1. **Database migrations** (explicitly mentioned example)
+   - Search for "migration", "SQL", "schema changes", "CREATE TABLE", "ALTER TABLE"
+   - If found: User must apply migration before tests will pass
+
+2. **External service setup**
+   - API key configuration (beyond .env.example updates)
+   - Third-party account creation
+   - Service deployments
+
+3. **Infrastructure changes**
+   - DNS updates
+   - Environment provisioning
+   - Deployment prerequisites
+
+4. **Manual installations**
+   - System-level dependencies (beyond pip/npm)
+   - CLI tools
+   - Database setup
+
+**If ANY blocking user actions are required:**
+
+1. **STOP execution** - Do NOT run validation commands yet
+2. **List all required actions:**
+   ```
+   ⚠️ USER ACTIONS REQUIRED BEFORE VALIDATION
+
+   The following actions must be completed before tests can pass:
+
+   1. [Action description]
+      - Why needed: [Brief explanation]
+      - How to do it: [Clear instructions or reference to plan section]
+
+   2. [Next action...]
+   ```
+
+3. **Ask user to notify when complete:**
+   ```
+   Please complete these actions and reply "done" or "ready" when finished.
+   I will then continue with validation testing.
+   ```
+
+4. **WAIT for user confirmation** - Do NOT proceed until user responds
+
+5. **After user confirms** - Continue to Step 3 (Run Validation Commands)
+
+**If NO blocking user actions found:**
+- Proceed directly to Step 3
+
+**Example blocking action (database migration):**
+```
+⚠️ USER ACTIONS REQUIRED BEFORE VALIDATION
+
+1. Apply Database Migration
+   - Why needed: Tests require new RPC functions (hybrid_search_chunks, keyword_search_chunks)
+   - How to do it:
+     * Open Supabase Dashboard → SQL Editor
+     * Copy contents of supabase/migrations/013_hybrid_search.sql
+     * Paste and execute in SQL Editor
+
+Please complete this action and reply "done" when finished.
+I will then run the full test suite to verify everything works.
+```
+
+**DO NOT claim tests "can't run" or mark execution complete without running tests after user completes required actions.**
 
 ### 3. MANDATORY: Run Validation Commands
 
@@ -270,63 +308,9 @@ Status: [ALL PASSED / FAILURES DETECTED]
 **Self-Check Question:**
 "Can I confidently claim this execution is production-ready?"
 - If NO → execution is INCOMPLETE, continue fixing
-- If YES → proceed to Step 4.5
+- If YES → proceed to Output Report
 
 **DO NOT claim execution complete with failing validations or missing tests.**
-
----
-
-### 4.5. MANDATORY: Update PROGRESS.md with Execution Summary
-
-**REQUIRED BEFORE Output Report:**
-
-Update PROGRESS.md with comprehensive execution summary:
-
-```markdown
-### Execution Phase
-**Status**: Complete
-**Completed**: [Current date/time]
-
-#### What Was Accomplished
-[Detailed list of completed tasks, files created/modified, features implemented]
-
-#### What's Left to Do
-[List any remaining work, future improvements, or follow-up tasks]
-
-#### Manual Tests Required
-[If applicable - list manual tests the user needs to perform]
-
-**USER ACTION REQUIRED**: After completing manual tests above, update this section with results so future agents are aware of test status.
-
-#### Automated Tests Status
-- Unit Tests: ✅ [X] passed
-- Integration Tests: ✅ [X] passed
-- E2E Tests: [Status]
-
-#### Validation Commands
-- All validation commands: ✅ PASSED
-```
-
-**If NO manual tests required**, omit that section.
-
----
-
-### 4.6. MANDATORY: CLI Validation Summary
-
-**REQUIRED - Output to CLI (not PROGRESS.md):**
-
-Write a **short, concise paragraph** (3-5 sentences) explaining:
-- How the core functionality of the feature was validated
-- What automated tests covered
-- What manual validation was performed (if any)
-- Overall confidence in the implementation
-
-**Example format:**
-```
-The core [feature name] functionality was validated through comprehensive automated testing. Unit tests verified [X], integration tests confirmed [Y], and end-to-end tests validated [Z]. Additionally, manual testing confirmed [specific aspect]. All validation commands passed, demonstrating production-ready implementation with [confidence level].
-```
-
-**This paragraph helps the user understand validation depth and decide if additional testing is needed.**
 
 ---
 
@@ -405,6 +389,77 @@ TEST EXECUTION RESULTS:
 Status: ✅ All tests passing
 ```
 
+### 4.5. MANDATORY: Pre-Validation User Action Check
+
+**CRITICAL:** Before running validation commands, check if the plan requires user actions that must be completed BEFORE tests can pass.
+
+**Check the plan for these blocking prerequisites:**
+
+1. **Database migrations** (explicitly mentioned example)
+   - Search for "migration", "SQL", "schema changes", "CREATE TABLE", "ALTER TABLE"
+   - If found: User must apply migration before tests will pass
+
+2. **External service setup**
+   - API key configuration (beyond .env.example updates)
+   - Third-party account creation
+   - Service deployments
+
+3. **Infrastructure changes**
+   - DNS updates
+   - Environment provisioning
+   - Deployment prerequisites
+
+4. **Manual installations**
+   - System-level dependencies (beyond pip/npm)
+   - CLI tools
+   - Database setup
+
+**If ANY blocking user actions are required:**
+
+1. **STOP execution** - Do NOT run validation commands yet
+2. **List all required actions:**
+   ```
+   ⚠️ USER ACTIONS REQUIRED BEFORE VALIDATION
+
+   The following actions must be completed before tests can pass:
+
+   1. [Action description]
+      - Why needed: [Brief explanation]
+      - How to do it: [Clear instructions or reference to plan section]
+
+   2. [Next action...]
+   ```
+
+3. **Ask user to notify when complete:**
+   ```
+   Please complete these actions and reply "done" or "ready" when finished.
+   I will then continue with validation testing.
+   ```
+
+4. **WAIT for user confirmation** - Do NOT proceed until user responds
+
+5. **After user confirms** - Continue to Step 5 (Run Validation Commands)
+
+**If NO blocking user actions found:**
+- Proceed directly to Step 5
+
+**Example blocking action (database migration):**
+```
+⚠️ USER ACTIONS REQUIRED BEFORE VALIDATION
+
+1. Apply Database Migration
+   - Why needed: Tests require new RPC functions (hybrid_search_chunks, keyword_search_chunks)
+   - How to do it:
+     * Open Supabase Dashboard → SQL Editor
+     * Copy contents of supabase/migrations/013_hybrid_search.sql
+     * Paste and execute in SQL Editor
+
+Please complete this action and reply "done" when finished.
+I will then run the full test suite to verify everything works.
+```
+
+**DO NOT claim tests "can't run" or mark execution complete without running tests after user completes required actions.**
+
 ### 5. MANDATORY: Run Validation Commands
 
 **CRITICAL:** Execute EVERY validation command listed in the plan.
@@ -439,60 +494,6 @@ Status: [ALL PASSED / FAILURES DETECTED]
 - ✅ No blocking issues remain
 
 **Only after ALL items ✅ COMPLETE:**
-
-### 6.5. MANDATORY: Update PROGRESS.md with Execution Summary
-
-**REQUIRED BEFORE Team Shutdown:**
-
-Update PROGRESS.md with comprehensive execution summary:
-
-```markdown
-### Execution Phase
-**Status**: Complete
-**Completed**: [Current date/time]
-
-#### What Was Accomplished
-[Detailed list of completed tasks, files created/modified, features implemented]
-
-#### What's Left to Do
-[List any remaining work, future improvements, or follow-up tasks]
-
-#### Manual Tests Required
-[If applicable - list manual tests the user needs to perform]
-
-**USER ACTION REQUIRED**: After completing manual tests above, update this section with results so future agents are aware of test status.
-
-#### Automated Tests Status
-- Unit Tests: ✅ [X] passed
-- Integration Tests: ✅ [X] passed
-- E2E Tests: [Status]
-
-#### Validation Commands
-- All validation commands: ✅ PASSED
-
-#### Team Execution Metrics
-- Agents used: [N]
-- Estimated time saved: [X]
-- Task distribution: [summary]
-```
-
-**If NO manual tests required**, omit that section.
-
----
-
-### 6.6. MANDATORY: CLI Validation Summary
-
-**REQUIRED - Output to CLI (not PROGRESS.md):**
-
-Write a **short, concise paragraph** (3-5 sentences) explaining:
-- How the core functionality of the feature was validated
-- What automated tests covered
-- What manual validation was performed (if any)
-- Overall confidence in the implementation
-
-**This paragraph helps the user understand validation depth and decide if additional testing is needed.**
-
----
 
 ### 7. Team Shutdown
 
@@ -574,10 +575,7 @@ TEAM-BASED PARALLEL - Clear frontend/backend separation justifies team execution
 
 ## Output Report
 
-**ONLY generate this report after:**
-- Passing Mandatory Verification Gate (Step 4 or 6)
-- Updating PROGRESS.md (Step 4.5 or 6.5)
-- Outputting CLI Validation Summary (Step 4.6 or 6.6)
+**ONLY generate this report after passing Step 4 Mandatory Verification Gate.**
 
 After execution completes and all validations pass, provide summary:
 
