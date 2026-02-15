@@ -282,6 +282,48 @@ Status: [ALL PASSED / FAILURES DETECTED]
 
 **If ANY command shows ❌ FAIL, execution is INCOMPLETE - fix and re-validate.**
 
+### 3.5. MANDATORY: Debug Trace Cleanup
+
+**CRITICAL:** Remove ALL debug traces added during implementation, debugging, and validation.
+
+**What to remove:**
+- ❌ `console.log()`, `console.debug()`, `console.info()` (JavaScript/TypeScript)
+- ❌ `print()`, `pprint()` statements (Python)
+- ❌ `debugger;` statements
+- ❌ Commented-out debug code
+- ❌ Temporary logging added for troubleshooting
+- ❌ Test output statements not in test files
+
+**What to keep:**
+- ✅ Pre-existing debug logs that were already in the codebase
+- ✅ Debug logs explicitly requested in the plan or requirements
+- ✅ Proper logging framework usage (logger.debug, logger.info, etc.)
+- ✅ Production logging for errors and important events
+
+**How to identify debug traces YOU added:**
+
+1. **Review git diff** - Look for new console.log/print statements
+2. **Search codebase:**
+   ```bash
+   # JavaScript/TypeScript
+   grep -r "console.log\|console.debug\|debugger;" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx"
+
+   # Python
+   grep -r "print(" --include="*.py" | grep -v "# keep" | grep -v "test_"
+   ```
+3. **Check each match** - Remove only what YOU added during this execution
+
+**Verification:**
+```bash
+# Run search again after cleanup - should find zero new debug traces
+# Compare with git diff to ensure only debug traces removed
+git diff --stat
+```
+
+**DO NOT proceed to Verification Gate until debug traces are cleaned up.**
+
+---
+
 ### 4. MANDATORY VERIFICATION GATE - EXECUTION INCOMPLETE UNTIL ALL PASS
 
 **CRITICAL:** You CANNOT proceed to "Output Report" until ALL items below pass.
@@ -291,6 +333,7 @@ Status: [ALL PASSED / FAILURES DETECTED]
 - ✅ All tasks from plan completed (list them)
 - ✅ All tests created and passing (show test run output)
 - ✅ All validation commands pass (show validation summary)
+- ✅ Debug traces removed (Step 3.5 completed)
 - ✅ Code follows project conventions
 - ✅ Documentation added/updated as needed
 
@@ -483,6 +526,50 @@ VALIDATION SUMMARY:
 Status: [ALL PASSED / FAILURES DETECTED]
 ```
 
+### 5.5. MANDATORY: Debug Trace Cleanup
+
+**CRITICAL:** Remove ALL debug traces added during implementation, debugging, and validation.
+
+**What to remove:**
+- ❌ `console.log()`, `console.debug()`, `console.info()` (JavaScript/TypeScript)
+- ❌ `print()`, `pprint()` statements (Python)
+- ❌ `debugger;` statements
+- ❌ Commented-out debug code
+- ❌ Temporary logging added for troubleshooting
+- ❌ Test output statements not in test files
+
+**What to keep:**
+- ✅ Pre-existing debug logs that were already in the codebase
+- ✅ Debug logs explicitly requested in the plan or requirements
+- ✅ Proper logging framework usage (logger.debug, logger.info, etc.)
+- ✅ Production logging for errors and important events
+
+**How to identify debug traces added by team:**
+
+1. **Review git diff** - Look for new console.log/print statements
+2. **Search codebase:**
+   ```bash
+   # JavaScript/TypeScript
+   grep -r "console.log\|console.debug\|debugger;" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx"
+
+   # Python
+   grep -r "print(" --include="*.py" | grep -v "# keep" | grep -v "test_"
+   ```
+3. **Check each match** - Remove only what was added during this execution
+
+**Verification:**
+```bash
+# Run search again after cleanup - should find zero new debug traces
+# Compare with git diff to ensure only debug traces removed
+git diff --stat
+```
+
+**Coordinate cleanup across team** - Ensure all teammates remove their debug traces before proceeding.
+
+**DO NOT proceed to Pre-Shutdown Verification Gate until debug traces are cleaned up.**
+
+---
+
 ### 6. MANDATORY: Pre-Shutdown Verification Gate
 
 **BLOCKING REQUIREMENTS - Cannot shutdown team until ALL pass:**
@@ -490,6 +577,7 @@ Status: [ALL PASSED / FAILURES DETECTED]
 - ✅ All tasks complete (verify via TaskList)
 - ✅ All tests passing (output shown)
 - ✅ All validation commands pass (summary shown)
+- ✅ Debug traces removed (Step 5.5 completed)
 - ✅ Integration verified
 - ✅ No blocking issues remain
 
