@@ -58,6 +58,14 @@ Use AskUserQuestion for each:
 4. **Timeline** - When did this start? Ever worked?
 5. **Reproduction** - How do you trigger it?
 
+**Async Pattern Check (if issue involves streams, traces, or resource cleanup):**
+
+If issue involves async generators, streaming responses, trace closure, or resource leaks:
+- Check if cleanup code is in `finally` block (not just `try` or after `yield`)
+- Verify cleanup executes in all scenarios: normal completion, errors, interruption
+- Look for stale closures in async callbacks (state read in setTimeout/callbacks)
+- Check if resources are released even when stream interrupted
+
 After all gathered, confirm ready to investigate.
 
 ## 3. Spawn gsd-debugger Agent

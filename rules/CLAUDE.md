@@ -10,12 +10,22 @@ These instructions apply to all projects unless overridden by project-specific C
 - Avoid unnecessary explanations unless asked
 - No emojis unless explicitly requested
 
+### Reporting Changes
+- When changes from a single user request exceed 10 lines across all files (code and non-code):
+  - Don't display full file contents in CLI output
+  - Instead, summarize: "filename: L10-17, L25-32" (line ranges changed)
+  - Example: "Updated main.py: L10-17, L25-32 | config.yaml: L5-8"
+- For changes ≤10 lines total: showing full changes is acceptable
+- **File paths:** Always preserve backslashes in Windows paths (e.g., `C:\Users\gilad\.claude\file.md` not `C:\Users\gilad.claude\file.md`)
+
 ### Development Workflow
 - Always use version control (git)
 - Create meaningful commit messages
 - Follow existing code style and conventions
 - Write tests for new features
 - Document complex logic
+- Test dependencies in isolation before adding to main environment
+- Use incremental testing - validate one component at a time before integration
 
 ### Planning & Execution
 - For non-trivial tasks, create a plan before implementing
@@ -34,6 +44,102 @@ These instructions apply to all projects unless overridden by project-specific C
 - Test critical paths
 - Use existing test credentials when available
 - Prefer automated tests over manual testing where practical
+- Validate edge cases: normal completion, errors, interruption/cancellation, concurrent operations
+- For async code: verify cleanup code executes in all scenarios (use finally blocks)
+
+### Async Generator Cleanup Pattern
+
+**CRITICAL:** Always use `finally` blocks for guaranteed cleanup in async generators.
+
+```python
+async def stream_generator():
+    run_id = None
+    error_occurred = False
+    try:
+        run_id = start_trace()
+        # Stream generation
+        yield data
+    except Exception as e:
+        error_occurred = True
+        # Error handling
+    finally:
+        # ALWAYS runs - close traces, cleanup resources
+        if run_id:
+            close_trace(run_id, error=error_occurred)
+```
+
+**Why:**
+- Async generators don't guarantee cleanup without `finally` blocks
+- Try/except pattern insufficient for stream interruption scenarios
+- Critical for: trace closure, database connections, file handles, external API cleanup
+
+**Examples:**
+- ✅ Good: Resource cleanup in `finally` block
+- ❌ Bad: Cleanup in `try` or after `yield` (won't run if generator interrupted)
+
+### Dependency Management
+
+Before adding new dependencies:
+
+1. **Test in isolated environment first:**
+   ```bash
+   # Create temporary venv
+   python -m venv test_env
+   test_env/Scripts/activate
+   pip install new-dependency
+   # Test for conflicts
+   ```
+
+2. **Check dependency tree:**
+   ```bash
+   pip install pipdeptree
+   pipdeptree -p new-dependency
+   ```
+
+3. **Document compatible version ranges:**
+   - In requirements.txt or plan
+   - Note known conflicts
+   - Have rollback plan (disable feature if dependencies conflict)
+
+4. **Gradual rollout:**
+   - Test one dependency at a time
+   - Verify existing functionality still works
+   - Document workarounds for conflicts
+
+### Debugging Methodology
+
+When encountering bugs:
+
+1. **Instrument early:**
+   - Add debug logging at key lifecycle points
+   - Use proper logging framework for persistent logs
+   - OK to use `print()` for temporary debugging - MUST remove before commit
+
+2. **Test in isolation:**
+   - Create minimal reproduction case
+   - Eliminate variables one at a time
+   - Gradually add complexity
+
+3. **Document findings:**
+   ```markdown
+   Debug Log:
+   1. Observed: [symptom]
+   2. Hypothesis: [theory]
+   3. Test: [what you tried]
+   4. Result: ✅/❌ [outcome]
+   5. Conclusion: [root cause]
+   ```
+
+4. **Verify async patterns:**
+   - Check if cleanup code executes in all scenarios
+   - Test with interrupted operations (timeouts, cancellations)
+   - Validate error handling paths
+
+5. **Edge case checklist:**
+   - Normal completion ✅
+   - Error scenarios ✅
+   - Interruption/cancellation ✅
+   - Concurrent operations ✅
 
 ### Credentials & Secrets Management
 

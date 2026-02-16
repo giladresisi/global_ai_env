@@ -143,6 +143,32 @@ uv run ruff check .
 
 **Expected:** "All checks passed!"
 
+### 4.1 Async Generator Pattern Check
+
+Check for async generators without finally blocks (potential resource leak):
+
+```bash
+# Find async generators
+grep -rn "async def.*yield" --include="*.py" . | grep -v test_ | grep -v "#" > /tmp/async_gens.txt
+
+# For each async generator, check if it has a finally block
+if [ -s /tmp/async_gens.txt ]; then
+    echo "Checking async generators for finally blocks..."
+    while read -r line; do
+        file=$(echo "$line" | cut -d: -f1)
+        linenum=$(echo "$line" | cut -d: -f2)
+        # Check next 30 lines for finally block
+        if ! sed -n "${linenum},$((linenum+30))p" "$file" | grep -q "finally:"; then
+            echo "⚠️  Potential missing finally block: $line"
+        fi
+    done < /tmp/async_gens.txt
+fi
+```
+
+**Expected:** No warnings about missing finally blocks (or manual verification that resource cleanup is handled elsewhere)
+
+**Why:** Async generators need finally blocks to guarantee cleanup (trace closure, DB connections, file handles) even when interrupted
+
 ## 5. Local Server Validation
 
 Start the server in background:

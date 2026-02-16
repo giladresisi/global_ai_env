@@ -204,7 +204,31 @@ Determine:
    - List verification tests to confirm service access
    - Define fallback strategy if verification fails
 
-#### 3.2 Technology & Pattern Research
+#### 3.2 Dependency Verification & Compatibility Check
+
+**Before adding new dependencies:**
+
+1. **Test in isolated environment:**
+   - Create temporary venv to test dependency compatibility
+   - Check for conflicts with existing packages (especially deep dependencies like PyTorch, TensorFlow)
+   - Document compatible version ranges
+
+2. **Check dependency tree:**
+   - Use `pipdeptree` or `npm list` to identify transitive dependencies
+   - Look for version conflicts with existing packages
+   - Note any peer dependency warnings
+
+3. **Plan for conflicts:**
+   - Document workarounds if conflicts exist (disable features, alternative packages)
+   - Have rollback strategy ready
+   - Consider feature flags to enable/disable based on environment
+
+4. **Document in plan:**
+   - Add to CONTEXT REFERENCES > Dependency Notes
+   - List compatible versions
+   - Note known conflicts and workarounds
+
+#### 3.3 Technology & Pattern Research
 
 - Research latest library versions and best practices
 - Find official documentation with specific section anchors
@@ -212,7 +236,7 @@ Determine:
 - Identify common gotchas and known issues
 - Check for breaking changes
 
-#### 3.3 Compile Research References
+#### 3.4 Compile Research References
 
 ```markdown
 ## Relevant Documentation

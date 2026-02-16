@@ -212,6 +212,15 @@ When implementing e2e tests that need a vault path:
 
 <List specific edge cases that must be tested for this feature>
 
+**Edge Case Coverage Checklist:**
+- [ ] Normal completion - Happy path scenarios work correctly
+- [ ] Error scenarios - Proper error handling and messages
+- [ ] Interruption/cancellation - Graceful handling of interrupted operations (timeouts, client disconnects)
+- [ ] Concurrent operations - No race conditions or state conflicts
+- [ ] For async generators/streams - Cleanup code executes in all scenarios (use finally blocks)
+- [ ] Boundary conditions - Empty inputs, null values, max limits
+- [ ] Invalid inputs - Proper validation and rejection
+
 ---
 
 ## VALIDATION COMMANDS
