@@ -63,27 +63,25 @@ git status
 git log -10 --oneline
 ```
 
-### Step 5: Generate Report
+### Step 5: Internalize Context
 
-**Project Overview**
+Build mental model of the project:
 - Purpose and type of application (from README)
 - Primary technologies and frameworks (from config)
-
-**Architecture**
 - Directory structure and organization
 - Key directories and their likely purposes (inferred from names)
 - Main architectural patterns (if obvious from structure)
 
-**Tech Stack**
-- Languages (inferred from config and directory structure)
-- Frameworks and major dependencies (from config)
-- Build tools
+**DO NOT output this to CLI.** Keep context in memory for answering questions.
 
-**Current State** (if git repo)
-- Active branch
-- Recent activity summary
+### Step 6: Output Completion
 
-**Keep report concise - bullet points, no deep implementation details.**
+Output only:
+```
+Finished priming project.
+```
+
+No detailed report. Context is loaded and ready for use.
 
 ---
 
@@ -119,34 +117,64 @@ Or use Glob for pattern matching:
 
 **No limit on file reading in focused mode.**
 
-### Step 4: Generate Report
+### Step 4: Analyze for Structural Blockers
 
-**Focus Area:** [provided argument]
-
-**Files Analyzed**
-- List all file paths read (grouped by directory)
-
-**Implementation Overview**
-- Key functions/classes/components with brief descriptions
+**Internalize understanding** (keep in memory, don't output):
+- Key functions/classes/components
 - Main data structures or types
 - Entry points and exports
+- Dependencies & integrations
+- Patterns & conventions
+- Testing approach
 
-**Dependencies & Integrations**
-- External libraries used
-- Internal modules/files this area depends on
-- Areas that depend on this code
+**Detect structural problems** that would block implementation:
 
-**Patterns & Conventions**
-- Code style observations
-- Design patterns used
-- Testing approach (if tests found)
+**Inconsistent Patterns:**
+- Mixed architectural styles (e.g., some files use MVC, others use different pattern)
+- Inconsistent naming conventions across files in the focus area
+- Multiple ways of doing the same thing with no clear standard
 
-**Technical Notes**
-- Important implementation details
-- Potential issues or concerns
-- Suggested related areas to explore
+**Unclear Organization:**
+- Files misplaced (e.g., business logic in UI components, or vice versa)
+- Unclear module boundaries or responsibilities
+- Circular dependencies or tangled imports
+- Missing separation of concerns
 
-**Provide detailed, specific, actionable information.**
+**Implementation Blockers:**
+- No clear entry point or hook for the requested feature
+- Conflicting patterns that make it unclear which approach to follow
+- Missing architectural foundation (e.g., no state management for feature that needs it)
+- Unclear how focus area integrates with rest of system
+
+### Step 5: Output Result
+
+**If structural blockers found:**
+
+Output detailed blocker report:
+```
+Finished priming. Found structural blockers for "[focus_area]":
+
+**Inconsistent Patterns:**
+- [Specific inconsistency with file examples]
+- [Another inconsistency]
+
+**Unclear Organization:**
+- [Specific organizational issue with file examples]
+
+**Implementation Blockers:**
+- [Specific blocker that prevents implementation]
+
+**Recommendation:** [Suggest refactoring or clarification needed before proceeding]
+```
+
+**If NO structural blockers found:**
+
+Output only:
+```
+Finished priming focused on "[focus_area]".
+```
+
+**DO NOT output detailed reports to CLI unless blockers are found.** Context is loaded and ready for use.
 
 ---
 
