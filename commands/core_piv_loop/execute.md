@@ -150,6 +150,41 @@ For EACH task in "Step by Step Tasks":
 - Include proper type hints and documentation
 - Add structured logging where appropriate
 
+#### b.5. Add Concise Code Remarks
+
+**REQUIRED as part of every implementation task:**
+
+**File-level comments** — Add a short comment block at the top of every file you create or significantly modify, unless one already exists. It should state:
+- What the file is responsible for
+- Why it exists / what role it plays in the system
+
+Example (Python):
+```python
+# auth/token_validator.py
+# Validates JWT tokens on incoming API requests.
+# Lives here (not in middleware) so validation logic can be unit-tested independently.
+```
+
+Example (TypeScript):
+```typescript
+// hooks/useSession.ts
+// Custom hook that manages user session state and syncs it with localStorage.
+// Centralizes session logic so all components get a consistent view of auth state.
+```
+
+**Inline remarks** — Add a concise comment directly above (not inline with) any of the following, where the reason isn't immediately obvious from the code itself:
+- Non-trivial algorithms or calculations
+- Workarounds, hacks, or gotchas
+- Critical business-logic decisions
+- Async/concurrency patterns (why a lock, why a retry, etc.)
+- Any code where a reasonable developer would ask "why is this here?"
+
+**Rules:**
+- Keep comments short (1–3 lines max)
+- Explain the *why*, not the *what* — the code already shows what
+- Do NOT add comments for self-explanatory code (getters, simple assignments, obvious CRUD)
+- Do NOT add comments to every function — only where complexity or purpose warrants it
+
 #### c. Verify as you go
 - After each file change, check syntax
 - Ensure imports are correct
@@ -404,6 +439,16 @@ Create general-purpose agents for each role and execute tasks in dependency-base
 - Address blockers immediately
 - Ensure agents mark tasks complete when done
 - Coordinate integration points between agents
+
+**Code Remarks — required for all agents:**
+
+Each spawned agent MUST follow these commenting rules when implementing their tasks:
+
+- **File-level comment** at the top of every file they create or significantly modify: briefly state what the file does and why it exists in the system.
+- **Inline remarks** above non-obvious logic: explain the *why* (not the *what*) for algorithms, workarounds, critical business decisions, and async/concurrency patterns.
+- Keep all comments short (1–3 lines). Skip comments for self-explanatory code.
+
+Include this requirement explicitly in the prompt given to each spawned agent.
 
 ### 4. MANDATORY: Integration & Testing Verification
 
