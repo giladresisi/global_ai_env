@@ -551,87 +551,139 @@ Tasks organized by execution waves for parallel execution.
 
 ## TESTING STRATEGY
 
-**⚠️ CRITICAL: Plan for MAXIMUM test automation**
+**⚠️ CRITICAL: ALL tests that can be automated MUST be automated**
 
-Attempt to automate as many tests as possible. Clearly mark automated vs manual tests.
+The default is automation. Manual testing is only acceptable when automation is physically impossible (e.g., hardware interaction, legal/auth barriers that cannot be bypassed in a test context). "It's hard to automate" or "it requires a browser" are NOT valid reasons — use Playwright MCP.
+
+### Automation-First Decision Rule
+
+Before marking any test as manual, answer: **"Could Playwright MCP, pytest, or any other automated tool perform this check?"**
+- If YES → automate it. No exceptions.
+- If NO → document the specific, concrete reason why automation is impossible.
+
+### Tool Selection by Test Type
+
+| What you're testing | Tool |
+|---|---|
+| Backend logic, services, APIs | `pytest` (backend `tests/auto/`) |
+| Frontend UI, user flows | Playwright (`frontend/tests/*.spec.ts`) |
+| Full-stack integration (UI → API → DB) | Playwright |
+| Third-party dashboards (LangSmith, Supabase, etc.) | Playwright — browse the actual site and assert state |
+| Third-party REST APIs (verify external state) | `pytest` or Playwright `fetch()` within tests |
+| Backend + third-party combined | `pytest` calling external APIs directly |
+
+**Key principle — Playwright MCP covers third-party sites too.** If validation requires checking state in an external dashboard (e.g., LangSmith traces, Supabase table contents, Stripe payments, email delivery), write a Playwright test that navigates to that site and asserts what you need. Do NOT replace this with a manual "go check the dashboard" step.
+
+**Example**: Instead of "Verify traces appear in LangSmith dashboard (manual)" → write a Playwright test that queries the LangSmith REST API or browses smith.langchain.com and asserts runs exist with the expected structure.
 
 ### Test Automation Requirements
 
 For EACH test, specify:
-1. **Test Type**: Unit/Integration/E2E/Visual/Performance
-2. **Automation Status**: ✅ Automated / ⚠️ Manual / 🔄 Semi-Automated
-3. **Tool/Framework**: pytest, Playwright MCP, Selenium, Cypress, Jest, etc.
-4. **Test Location**: Where test files created
-5. **Execution Command**: How to run
-6. **Manual Explanation**: If manual, WHY not automated (brief)
+1. **Test Type**: Unit / Integration / E2E / Third-Party Validation
+2. **Automation Status**: ✅ Automated / ⚠️ Manual (requires concrete justification)
+3. **Tool/Framework**: pytest / Playwright / Jest
+4. **Test Location**: Exact file path
+5. **Execution Command**: Exact command to run
+6. **Manual Justification** (if ⚠️): The specific reason automation is impossible — not just difficult
 
-**Automation Preference:** Fully Automated ✅ → Semi-Automated 🔄 → Manual ⚠️ (last resort)
-
-**Available Tools:** pytest, Jest, Playwright MCP, Cypress, Selenium, Testing Library, Postman CLI, Lighthouse, k6, MCP servers
+**Automation Preference:** ✅ Automated → ⚠️ Manual (last resort, must justify)
 
 ### Unit Tests
 
 **Automation**: ✅ Fully Automated
-**Tool**: [pytest, Jest, unittest]
-**Location**: [tests/unit/, src/**/*.test.ts]
+**Tool**: [pytest / Jest / unittest]
+**Location**: [backend/tests/auto/ or frontend/src/**/*.test.ts]
 **Execution**: `[command]`
 
 ### Integration Tests
 
 **Automation**: ✅ Fully Automated
-**Tool**: [pytest, Playwright MCP]
-**Location**: [tests/integration/]
+**Tool**: [pytest / Playwright]
+**Location**: [backend/tests/auto/ or frontend/tests/]
 **Execution**: `[command]`
 
 ### End-to-End Tests
 
-**Automation**: [✅ Automated / ⚠️ Manual - explain why]
-**Tool**: [Playwright MCP, Cypress, Manual]
-**Location**: [tests/e2e/]
+**Automation**: ✅ Automated (Playwright is capable of full E2E including auth flows)
+**Tool**: Playwright (`frontend/tests/*.spec.ts`)
+**Location**: `frontend/tests/[feature].spec.ts`
+**Execution**: `cd frontend && npx playwright test [feature]`
 
-If automated: E2E scenarios, workflows, automation approach
-**Execution**: `[command]`
+Describe E2E scenarios: login → action → assert result in UI and/or database.
 
-If manual:
-**Why Manual**: [Brief reason - e.g., "Requires hardware", "Third-party OAuth can't automate in test env"]
-**Steps**: [1. Step, 2. Step, 3. Expected]
+### Third-Party Service Validation
 
-### Manual Tests (Only if automation not feasible)
+For any feature that produces observable state in an external service:
+
+**Automation**: ✅ Automated via Playwright or direct API call
+**Examples**:
+- LangSmith traces → Playwright test queries `/api/v1/runs/query` and asserts run structure
+- Supabase table state → pytest queries Supabase REST API or uses supabase-py client
+- Email delivery → pytest queries email API (Resend, SendGrid) for delivery status
+- Webhook delivery → pytest checks webhook provider dashboard API
+
+**Pattern** (third-party REST API in Playwright):
+```typescript
+// In frontend/tests/[feature].spec.ts
+const res = await fetch('https://third-party.api/endpoint', {
+  headers: { 'x-api-key': process.env.THIRD_PARTY_API_KEY! }
+});
+const data = await res.json();
+expect(data.someField).toBe(expectedValue);
+```
+
+**Pattern** (third-party REST API in pytest):
+```python
+# In backend/tests/auto/test_[feature].py
+import requests, os
+res = requests.get('https://third-party.api/endpoint',
+    headers={'Authorization': f"Bearer {os.getenv('THIRD_PARTY_API_KEY')}"})
+assert res.status_code == 200
+assert res.json()['someField'] == expected_value
+```
+
+### Manual Tests (Only if automation is physically impossible)
+
+Valid reasons to mark a test as manual:
+- Requires physical hardware (camera, microphone, Bluetooth, NFC)
+- Requires a human to perform a legal/compliance action (sign a document, pass a CAPTCHA)
+- Third-party enforces strict bot detection that cannot be bypassed even with real browser automation
+
+**NOT** valid reasons:
+- ~~"It requires a browser"~~ — use Playwright
+- ~~"It requires visiting a third-party site"~~ — use Playwright or their REST API
+- ~~"It's hard to set up"~~ — set it up
+- ~~"It's an observability feature"~~ — automate the assertion
 
 #### Manual Test [#]: [Name]
-**Why Manual**: [Concise reason]
-**Frequency**: [When to run]
+**Why Manual**: [Specific, concrete reason automation is impossible]
 **Steps**: [1, 2, 3]
 **Expected**: [Success criteria]
-**Time**: [estimate]
 
 ### Edge Cases
-
-**Automation**: [✅/⚠️/🔄]
-**Tool**: [tool]
 
 For each edge case:
 - **Test**: [Name]
 - **Scenario**: [What edge case]
-- **Automation**: ✅ [tool] / ⚠️ Manual because [reason]
-- **Execution**: `[command]` or [manual steps]
+- **Automation**: ✅ [pytest/Playwright] — `[command]`
+- If truly manual: **Why**: [Specific reason]
 
 ### Test Automation Summary
 
 **Total Tests**: [#]
 - ✅ **Automated**: [#] ([%]%)
-  - Unit: [#] via [tool]
-  - Integration: [#] via [tool]
-  - E2E: [#] via [tool]
-- ⚠️ **Manual**: [#] ([%]%) - [brief reasons]
+  - Backend (pytest): [#]
+  - Frontend/E2E (Playwright): [#]
+  - Third-party validation: [#]
+- ⚠️ **Manual**: [#] ([%]%) — [specific reason for each]
 
-**Goal**: 80%+ automated coverage
+**Goal**: 100% automation. Any manual test requires explicit justification.
 
 **Execution Agent Instructions**:
-- CREATE all automated test files during implementation
-- UPDATE automated tests as part of tasks
-- RUN automated tests after each validation
-- DOCUMENT manual test results in execution report
+- CREATE all automated test files as part of implementation tasks (not afterthoughts)
+- RUN automated tests after each wave checkpoint
+- Third-party validation tests go in the same test suite as other tests — not in a separate "manual verification" section
+- DOCUMENT manual test results in execution report only when automation is genuinely impossible
 
 ---
 
