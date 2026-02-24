@@ -29,9 +29,10 @@ These instructions apply to all projects unless overridden by project-specific C
 
 ### Planning & Execution
 - For non-trivial tasks, create a plan before implementing
-- Save plans to `.agents/plans/` directory
+- Save plans to `.agents/plans/` directory with naming convention `{sequence}.{plan-name}.md` (e.g., `1.auth-setup.md`)
 - Include validation steps in all plans
 - Mark plan complexity: ✅ Simple, ⚠️ Medium, 🔴 Complex
+- **Parallel agent waves:** Define explicit interface contracts between waves — what outputs wave N provides and what inputs wave N+1 requires. Annotate tasks with their wave number to enable safe parallelization
 
 ### Code Quality
 - Prefer simple, maintainable code over clever solutions
@@ -39,6 +40,7 @@ These instructions apply to all projects unless overridden by project-specific C
 - Don't add unnecessary abstractions
 - Security first - watch for common vulnerabilities (SQL injection, XSS, etc.)
 - Only add comments where logic isn't self-evident
+- **Production code is silent:** No print/stdout logging in production paths. Capture errors in structured data (e.g., status fields, error columns) rather than printing them. Use a logging framework only for critical failures
 
 ### Testing
 - Test critical paths
@@ -46,6 +48,7 @@ These instructions apply to all projects unless overridden by project-specific C
 - Prefer automated tests over manual testing where practical
 - Validate edge cases: normal completion, errors, interruption/cancellation, concurrent operations
 - For async code: verify cleanup code executes in all scenarios (use finally blocks)
+- **Pre-execution audit:** Run the full test suite before starting implementation. Document baseline (passing, broken, skipped) in the plan so you know what you broke vs. what was pre-existing
 
 ### Async Generator Cleanup Pattern
 
