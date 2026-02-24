@@ -265,6 +265,7 @@ project/
 - ❌ Don't write real credentials in non-gitignored files (.env.example, docs, code)
 - ❌ Don't make breaking changes without discussion
 - ❌ Don't bypass security checks or validation
+- ❌ Don't commit changes as part of a request unless explicitly requested
 
 ## Asking for Help
 
