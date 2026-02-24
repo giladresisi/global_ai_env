@@ -1,3 +1,8 @@
+---
+name: commit
+description: Use when the user asks to commit changes, create a commit, or save work to git
+---
+
 Create a new commit for all of our uncommitted changes
 
 ## Step 0: Determine Reasoning

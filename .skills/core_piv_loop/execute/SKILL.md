@@ -1,3 +1,8 @@
+---
+name: core_piv_loop:execute
+description: Use when implementing a feature plan file, choosing between sequential and team-based parallel execution with mandatory validation gates
+---
+
 # Execute: Implement from Plan
 
 ## Plan to Execute

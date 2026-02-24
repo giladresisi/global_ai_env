@@ -1,5 +1,6 @@
 ---
-description: Generate implementation report for system review
+name: validation:execution-report
+description: Use when generating an implementation report after feature completion documenting what was done, divergences from plan, and test results
 ---
 
 # Execution Report

@@ -1,6 +1,6 @@
 ---
-description: Analyze and document root cause for a GitHub issue
-argument-hint: [github-issue-id]
+name: github_bug_fix:rca
+description: Use when investigating a GitHub issue to identify root cause, assess impact, and create a fix strategy document
 ---
 
 # Root Cause Analysis: GitHub Issue #$ARGUMENTS

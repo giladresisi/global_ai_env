@@ -1,6 +1,6 @@
 ---
-description: Prime agent with codebase understanding
-args: "[focus_area]"
+name: core_piv_loop:prime
+description: Use when loading project context and architecture overview before starting implementation work, with optional focus on a specific area
 ---
 
 # Prime: Load Project Context

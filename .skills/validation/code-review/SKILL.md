@@ -1,5 +1,6 @@
 ---
-description: Technical code review for quality and bugs that runs pre-commit
+name: validation:code-review
+description: Use when performing a technical pre-commit code review on recently changed files for bugs, security issues, and standards compliance
 ---
 
 Perform technical code review on recently changed files.

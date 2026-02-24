@@ -1,5 +1,6 @@
 ---
-description: Research and validate external API integration requirements
+name: core_piv_loop:explore-api
+description: Use when researching an unfamiliar external API before integration to verify feasibility, integration patterns, and limitations
 ---
 
 # Explore External API

@@ -1,5 +1,6 @@
 ---
-description: Process to fix bugs found in manual/AI code review
+name: validation:code-review-fix
+description: Use when fixing bugs found during a code review, processing each issue with explanation and test verification
 ---
 
 I ran/performed a code review and found these issues:

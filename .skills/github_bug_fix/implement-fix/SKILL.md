@@ -1,7 +1,6 @@
 ---
-description: Implement fix from RCA document for GitHub issue
-argument-hint: [github-issue-id]
-allowed-tools: Read, Write, Edit, Bash(ruff:*), Bash(mypy:*), Bash(pytest:*), Bash(npm:*), Bash(bun:*)
+name: github_bug_fix:implement-fix
+description: Use when implementing a fix for a GitHub issue that already has an RCA document at docs/rca/issue-{id}.md
 ---
 
 # Implement Fix: GitHub Issue #$ARGUMENTS

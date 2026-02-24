@@ -1,6 +1,6 @@
 ---
 name: create-worktree
-description: Create a git worktree with automatic environment setup (copy .env files, venv, install dependencies)
+description: Use when creating a git worktree for feature isolation with automatic environment setup including .env files, venv copying, and dependency installation
 ---
 
 # Create Worktree with Environment Setup

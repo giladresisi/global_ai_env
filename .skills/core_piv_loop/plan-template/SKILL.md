@@ -1,3 +1,8 @@
+---
+name: core_piv_loop:plan-template
+description: Use when creating a structured implementation plan from a feature description using the standard plan template
+---
+
 **Create comprehensive plan with the following structure:**
 
 Feature description: $ARGUMENTS

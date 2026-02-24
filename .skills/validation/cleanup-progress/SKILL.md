@@ -1,5 +1,6 @@
 ---
-description: Cleanup PROGRESS.md after feature completion
+name: validation:cleanup-progress
+description: Use when a feature is complete and PROGRESS.md needs cleaning up by replacing verbose execution notes with a concise completion summary
 ---
 
 # Cleanup Feature Progress

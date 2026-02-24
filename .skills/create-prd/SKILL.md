@@ -1,6 +1,6 @@
 ---
-description: Create a Product Requirements Document from conversation
-argument-hint: [output-filename]
+name: create-prd
+description: Use when creating a Product Requirements Document from a conversation or feature request through structured context gathering
 ---
 
 # Create PRD: Generate Product Requirements Document

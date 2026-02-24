@@ -1,3 +1,8 @@
+---
+name: core_piv_loop:prime-tools
+description: Use when about to build or modify agent tools and needing to load tool docstring patterns and best practices first
+---
+
 # Prime for Tool Development
 
 Load tool development patterns from Module 3 to prepare for building agent tools.

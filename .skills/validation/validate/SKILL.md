@@ -1,3 +1,8 @@
+---
+name: validation:validate
+description: Use when running comprehensive project validation including tests, type checking, linting, API connectivity checks, and server startup verification
+---
+
 Run comprehensive validation of the project to ensure all tests, type checks, linting, and deployments are working correctly.
 
 Execute the following commands in sequence and report results:

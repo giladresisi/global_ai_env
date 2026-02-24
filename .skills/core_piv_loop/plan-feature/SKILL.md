@@ -1,6 +1,6 @@
 ---
-description: "Create comprehensive feature plan with deep codebase analysis and research"
-argument-hint: [feature-description]
+name: core_piv_loop:plan-feature
+description: Use when creating a comprehensive implementation plan for a new feature including codebase analysis, API research, and parallel execution strategy
 ---
 
 # Plan a new task

@@ -1,3 +1,8 @@
+---
+name: init-project
+description: Use when setting up or reinitializing this project locally for the first time
+---
+
 # Initialize Project
 
 Run the following commands to set up and start the project locally:

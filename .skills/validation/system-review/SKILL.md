@@ -1,5 +1,6 @@
 ---
-description: Analyze implementation against plan for process improvements
+name: validation:system-review
+description: Use when performing a meta-level analysis of plan adherence after implementation to identify process improvements and suggest CLAUDE.md updates
 ---
 
 # System Review
