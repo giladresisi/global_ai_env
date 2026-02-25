@@ -819,6 +819,67 @@ wc -l .agents/plans/[feature-name].md
 - [ ] **File exists** (verified with test -f)
 - [ ] **Line count verified** (500-700 lines)
 
+---
+
+## COVERAGE REVIEW PASS
+
+**MANDATORY: Run this pass after the plan file is written and verified.**
+
+This is a dedicated read-through of the plan focused solely on test coverage. It runs automatically — no user input required unless a gap cannot be resolved.
+
+### Step 1: Map Feature Code Paths
+
+For every file the plan creates or modifies, enumerate:
+- All new functions, methods, classes
+- All conditional branches (if/else, try/except, switch)
+- All async flows and error paths
+- All public API surface (endpoints, exports, event handlers)
+- All data mutations (writes, deletes, updates)
+
+### Step 2: Map Project-Level Impact
+
+Identify existing code affected by this feature:
+- Files that import or call anything being changed
+- Existing tests that exercise modified code paths
+- Integration points where the new feature connects to existing logic
+
+For each impacted area, check whether:
+1. Existing tests still provide accurate coverage after the change
+2. New tests are needed to cover interaction between the feature and existing code
+
+### Step 3: Coverage Gap Analysis
+
+For each code path from Steps 1 and 2, verify a test in the plan covers it.
+
+Mark each path as:
+- ✅ **Covered** — a specific test in the plan exercises this path
+- ⚠️ **Gap** — no test covers this path
+
+**Common gaps to look for:**
+- Error/exception branches with no test
+- Edge inputs (empty, null, boundary values) not tested
+- Async cancellation or timeout paths
+- Side effects (emails sent, events emitted, files written) not asserted
+- Existing callers of modified functions not re-tested
+
+### Step 4: Fill Gaps
+
+For each ⚠️ Gap:
+
+1. **Default: Add an automated test** — add it to the plan's TESTING STRATEGY and STEP-BY-STEP TASKS
+2. **If automation is genuinely impossible** — add a manual test entry with a one-sentence explanation of why (e.g., "requires physical camera hardware", "CAPTCHA blocks automation"). "Hard to automate" or "requires a browser" are NOT valid reasons.
+
+Update the plan file using the Edit tool. Do NOT output updated plan content to CLI.
+
+### Step 5: Re-verify
+
+After filling gaps, do a final scan:
+- Re-check all ⚠️ gaps are now addressed
+- Re-count automated vs manual tests
+- Update the Test Automation Summary in the plan
+
+If new gaps are found, repeat Step 4. Continue until all paths are either ✅ Covered or documented as manual-only with justification.
+
 **Line Count Adjustment:**
 - If < 500: Add examples, edge cases, validation details
 - If > 700: Consolidate tasks, remove redundancy, use concise language
@@ -839,6 +900,11 @@ wc -l .agents/plans/[feature-name].md
 - [ ] **Interface contracts defined**
 - [ ] **Integration checkpoints specified**
 - [ ] **30%+ tasks can execute in parallel** (or explain why not)
+- [ ] **Coverage Review Pass completed:**
+  - [ ] All new code paths enumerated and mapped to tests
+  - [ ] Existing code affected by this feature identified and covered
+  - [ ] All gaps either filled with automated tests or documented as manual-only with justification
+  - [ ] Test Automation Summary updated after gap-filling
 - [ ] **Test Automation Planned:**
   - [ ] Every test marked ✅/⚠️/🔄
   - [ ] Automated tests specify tool (pytest, Playwright MCP, etc.)
@@ -888,12 +954,15 @@ wc -l .agents/plans/[feature-name].md
 - [ ] Level 0 validation includes services
 
 ### Test Automation Planning ✓
+- [ ] Coverage Review Pass completed (Steps 1–5)
+- [ ] All new code paths mapped to tests
+- [ ] Existing impacted code re-validated
 - [ ] Every test categorized (✅/⚠️/🔄)
 - [ ] Automated tests specify tool
 - [ ] Automated tests include commands
-- [ ] Manual tests explain why
+- [ ] Manual tests explain why automation is impossible
 - [ ] Test summary with percentages
-- [ ] 80%+ coverage goal
+- [ ] 100% path coverage targeted; gaps documented with justification
 - [ ] Execution agent has clear test instructions
 
 ### Pattern Consistency ✓
@@ -939,11 +1008,13 @@ After creating the plan, output this report and STOP (do not execute):
 - Max Speedup: [X]x with [N] parallel agents
 - Sequential: [#] must run sequentially
 
-🧪 Test Automation:
-- Total: [#] tests
-- Automated: [#] ([XX]%) - using [tools: pytest, Playwright MCP, etc.]
-- Manual: [#] ([XX]%) - [brief reason if >20%]
-- Goal: 80%+ [✅ Met / ⚠️ [XX]% - explain]
+🧪 Coverage Summary:
+- New code paths covered: [#]/[#] ([XX]%)
+- Existing code re-validated: [#] impacted areas, [#] new/updated tests added
+- Automated: [#] tests ([XX]%) — [tools: pytest, Playwright, etc.]
+- Manual: [#] tests ([XX]%) — [one-line reason per test, or "None"]
+- Gaps remaining: [# or "None"] — [brief reason for each uncovered path, if any]
+- Goal: 100% path coverage [✅ Achieved / ⚠️ [XX]% — [gaps and why]]
 
 ⚠️  Key Risks:
 [2-4 risks with mitigations]
