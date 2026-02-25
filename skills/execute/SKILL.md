@@ -768,15 +768,15 @@ After execution completes and all validations pass, provide summary:
 
 ---
 
-## Invoke Execution Report (if available)
+## Invoke Execution Report
 
-After generating the Output Report above, run:
+After generating the Output Report above, **ALWAYS** invoke the execution-report skill using the `Skill` tool:
 
-```bash
-test -f ~/.claude/skills/execution-report/SKILL.md && echo "exists" || echo "not found"
+```
+skill: "ai-dev-env:execution-report"
 ```
 
-**If the skill exists**, invoke it using the `Skill` tool (`skill: "execution-report"`) and pass the following context:
+Pass the following context when invoking it:
 
 ---
 
@@ -802,4 +802,4 @@ Use this to populate the "Test Results" and "Validation Results" sections of the
 
 ---
 
-**If the skill does not exist**, skip this step.
+**Note:** The execution-report skill is installed via the marketplace. Do NOT use a bash file-existence check — just invoke the Skill tool directly.
