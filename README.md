@@ -36,7 +36,7 @@ Start a new session and ask your agent to plan a feature or commit changes. It s
 
 | Skill | When it activates |
 |-------|-------------------|
-| `execute` | Implementing a feature plan file, choosing between sequential and team-based parallel execution with mandatory validation gates |
+| `execute` | Implementing a feature plan file, choosing between sequential and team-based parallel execution with mandatory validation gates; automatically calls `execution-report` on completion to surface coverage gaps |
 | `init-project` | Setting up or reinitializing a project locally for the first time |
 
 ### Code Review & Quality
@@ -74,7 +74,7 @@ Start a new session and ask your agent to plan a feature or commit changes. It s
 |-------|-------------------|
 | `validate` | Running comprehensive project validation including tests, type checking, linting, and server startup |
 | `cleanup-progress` | Cleaning up PROGRESS.md after feature completion, replacing verbose notes with a concise summary |
-| `execution-report` | Generating an implementation report after feature completion |
+| `execution-report` | Generating an implementation report after feature completion, including a coverage gap analysis comparing what was planned vs what was actually tested; called automatically by `execute` |
 | `system-review` | Performing a meta-level analysis of plan adherence to identify process improvements |
 
 ## Philosophy

@@ -765,3 +765,41 @@ After execution completes and all validations pass, provide summary:
 ✅ **EXECUTION COMPLETE** - All implementations, tests, and validations passed successfully.
 
 **Ready for commit:** Yes - all changes verified and production-ready.
+
+---
+
+## Invoke Execution Report (if available)
+
+After generating the Output Report above, run:
+
+```bash
+test -f ~/.claude/skills/execution-report/SKILL.md && echo "exists" || echo "not found"
+```
+
+**If the skill exists**, invoke it using the `Skill` tool (`skill: "execution-report"`) and pass the following context:
+
+---
+
+**Coverage gap context — include this when calling execution-report:**
+
+Compare planned test coverage (from the plan file) against what was actually executed:
+
+1. **Planned coverage** — from the plan's "Test Automation Summary" / "Coverage Summary":
+   - Each planned test: automation status (✅/⚠️), tool, file path
+   - Planned automated % and total code-path coverage %
+
+2. **Actual coverage** — from this execution:
+   - Which planned tests were created and passed (✅)
+   - Which planned tests were skipped, deferred, or left failing (⚠️/❌)
+   - Which VALIDATION COMMANDS levels were not executed or produced failures
+
+3. **Gaps** — explicitly identify:
+   - Tests planned but not implemented
+   - Validation levels that were skipped or failed without resolution
+   - Code paths introduced during implementation that were not in the original plan and have no test coverage
+
+Use this to populate the "Test Results" and "Validation Results" sections of the execution report, and add a **"Coverage Gaps"** subsection that lists each gap with its severity (blocking / non-blocking) and a recommended follow-up action.
+
+---
+
+**If the skill does not exist**, skip this step.
