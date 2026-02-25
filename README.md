@@ -84,6 +84,14 @@ Start a new session and ask your agent to plan a feature or commit changes. It s
 - **Systematic over ad-hoc** — Structured processes for debugging, planning, and validation
 - **Evidence over claims** — Validate and report results, don't just declare work done
 
+## Updating
+
+Skills update automatically when you update the plugin:
+
+```bash
+/plugin update ai-dev-env
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
