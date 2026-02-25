@@ -30,7 +30,16 @@ After the plan is created:
 
 ## Step 0: Log Planning Start
 
-Create/update `PROGRESS.md`:
+Before writing anything, **check if `PROGRESS.md` already has a relevant section for this feature** — especially if this skill was triggered by referencing something in `PROGRESS.md` (e.g. the user pointed at a section, or the feature description matches an existing entry).
+
+**If a relevant section already exists:** update its top fields only (status, add Plan File line). Do NOT create a duplicate entry.
+
+```markdown
+**Status**: ✅ Planned
+**Plan File**: .agents/plans/[feature-name].md
+```
+
+**If no relevant section exists:** add a new entry using the template below.
 
 ```markdown
 ## Feature: [Feature Name]
@@ -40,7 +49,7 @@ Create/update `PROGRESS.md`:
 **Plan File**: .agents/plans/[feature-name].md
 ```
 
-Use Write if file doesn't exist, Edit if it does.
+Use Write if `PROGRESS.md` doesn't exist, Edit if it does.
 
 ---
 
