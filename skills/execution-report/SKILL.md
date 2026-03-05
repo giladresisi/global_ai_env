@@ -33,7 +33,20 @@ You have just finished implementing a feature. Before moving on, reflect on:
 Extract the feature/module name from PROGRESS.md or the plan file path.
 Example: "module-5-multi-format-enhancement" from plan path `.agents/plans/module-5-multi-format-enhancement.md`
 
-### Step 2: Create Detailed Execution Report
+### Step 2: Summarize Test Coverage
+
+Before writing the report, inspect the test files that were added or modified during this implementation:
+
+1. Use `git diff --name-only HEAD` (or diff against the base branch) to identify changed files
+2. Filter for test files (files under `tests/`, named `test_*.py`, `*.test.ts`, `*.spec.*`, etc.)
+3. For each changed test file, read it and identify:
+   - What functions/endpoints/behaviors are tested
+   - What scenarios are covered (happy path, error cases, edge cases)
+4. Produce a concise bulleted list — one sentence per item — capturing what each test validates
+
+You will include this list in the report under `## What was tested`.
+
+### Step 3: Create Detailed Execution Report
 
 **Create file:** `.agents/execution-reports/{feature-name}.md`
 
@@ -92,6 +105,16 @@ Example: "module-5-multi-format-enhancement" from plan path `.agents/plans/modul
 **Tests Added:** [list with descriptions]
 **Test Execution:** [show test output summary]
 **Pass Rate:** X/Y (Z%)
+
+---
+
+## What was tested
+
+[Bulleted list — one sentence each — describing what each test validates. Derived from inspecting changed test files (Step 2 above). Focus on the scenario/behavior, not the file name.]
+
+- [e.g., `POST /ingest` returns 422 when the payload is missing required fields]
+- [e.g., Semantic search returns ranked results ordered by cosine similarity]
+- [e.g., KB entry creation is atomic — partial writes are rolled back on failure]
 
 ---
 
@@ -155,7 +178,7 @@ Example: "module-5-multi-format-enhancement" from plan path `.agents/plans/modul
 **Ready for Production:** Yes/No - [reasoning]
 ```
 
-### Step 3: Update PROGRESS.md
+### Step 4: Update PROGRESS.md
 
 **Use Edit tool to add/update in PROGRESS.md under the current feature:**
 

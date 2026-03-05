@@ -1,6 +1,6 @@
 ---
 name: create-worktree
-description: Use when creating a git worktree for feature isolation with automatic environment setup including .env files, venv copying, and dependency installation
+description: Use when creating a git worktree for feature isolation with automatic environment setup including .env files and dependency installation
 ---
 
 # Create Worktree with Environment Setup
@@ -59,40 +59,34 @@ This approach:
 3. Copies only files that exist
 4. Works with gitignored files that Glob cannot see
 
-## Step 5: Copy venv Folders
+## Step 5: Install Python Dependencies
 
-Use Bash to check for venv folders:
-- Top-level: `venv/`
-- Backend: `backend/venv/`
+Check which Python package manager the project uses, then install dependencies in the worktree:
 
-For each venv folder found:
-1. Copy the entire folder to the target worktree
-2. **CRITICAL: MUST use `cp -r` command (works on all platforms including Windows Git Bash)**
+**If project uses `uv`** (has `pyproject.toml` + `uv.lock`):
+- Run `uv sync` — recreates `.venv` from the lockfile, no copying needed
 
 ```bash
-# All platforms (Windows/Unix/Mac) - use cp -r
-cp -r venv ../{branch-name}/venv
-```
-
-## Step 6: Install Python Dependencies
-
-Use Glob to find all `requirements.txt` files in:
-- Top-level: `requirements.txt`
-- Backend: `backend/requirements.txt`
-
-For each requirements.txt found where a venv exists in the same directory:
-1. Navigate to the target worktree directory
-2. Run pip install using the venv's Python
-
-```bash
-# Windows
-cd ..\{branch-name}\backend
-venv\Scripts\python -m pip install -r requirements.txt
-
-# Unix/Mac
+# uv projects — run in the worktree backend directory
 cd ../{branch-name}/backend
-venv/bin/python -m pip install -r requirements.txt
+uv sync
 ```
+
+**If project uses `pip`** (has `requirements.txt`):
+- Copy the existing venv, then run pip install
+
+```bash
+# Copy venv (all platforms)
+cp -r backend/venv ../{branch-name}/backend/venv
+
+# Install dependencies
+# Windows
+cd ..\{branch-name}\backend && venv\Scripts\python -m pip install -r requirements.txt
+# Unix/Mac
+cd ../{branch-name}/backend && venv/bin/python -m pip install -r requirements.txt
+```
+
+Check both top-level and `backend/` for `pyproject.toml`/`uv.lock` or `requirements.txt`.
 
 ## Step 7: Install npm Dependencies
 
@@ -122,8 +116,7 @@ npm install
 Provide a summary to the user:
 - Worktree created at: `../{branch-name}`
 - .env files copied: [list]
-- venv folders copied: [list]
-- Python dependencies installed in: [list]
+- Python dependencies installed in: [list] (method: uv sync / pip install)
 - npm dependencies installed in: [list]
 
 ## Platform Detection
@@ -140,8 +133,7 @@ Use appropriate commands (copy vs cp, robocopy vs cp -r, Scripts vs bin) based o
 
 - If git worktree add fails, stop and report error
 - If .env copy fails, warn but continue
-- If venv copy fails, warn but continue
-- If pip install fails, warn but continue
+- If uv sync / pip install fails, warn but continue
 - If npm install fails, warn but continue
 - Always report which steps succeeded and which failed
 
@@ -158,11 +150,8 @@ Copying .env files...
 ✓ Copied backend/.env
 ✓ Copied frontend/.env
 
-Copying venv folders...
-✓ Copied backend/venv (large folder, may take a moment)
-
 Installing Python dependencies...
-✓ Installed backend/requirements.txt (15 packages)
+✓ uv sync in backend/ (recreated .venv from uv.lock)
 
 Installing npm dependencies...
 ✓ Installed frontend/package.json (127 packages)

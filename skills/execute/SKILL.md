@@ -141,6 +141,32 @@ For simple plans (1-3 independent tasks, no parallel execution strategy):
 - Note the validation commands to run
 - Review the testing strategy
 
+### 1.5. MANDATORY: Enumerate Manual Prerequisites Before Writing Code
+
+**REQUIRED IMMEDIATELY AFTER READING THE PLAN — before touching any files:**
+
+Scan the plan for steps that cannot be automated: secrets, `.env` files, credentials, migrations, service setup, CLI installs.
+
+**For EACH manual prerequisite found:**
+
+1. Classify it:
+   - **Runtime-critical** — required for the app to start or for any code path to function (e.g., `KB_API_KEY` in `.env`, DB migration)
+   - **Validation-only** — only needed to run the final demo or integration tests
+
+2. For **runtime-critical** prerequisites:
+   - **STOP here** — do NOT write any code yet
+   - Ask the user to complete the step now and confirm when done
+   - Only proceed after confirmation
+
+3. For **validation-only** prerequisites:
+   - Note them — you will revisit at Step 2.8
+
+**Why this must happen before coding, not just before validation:**
+
+If you start writing tests before required secrets exist, you will inject env vars directly into test fixtures to make tests pass. This masks wiring bugs — e.g., `load_dotenv()` is never called because tests bypass it with `os.environ["KEY"] = "..."`. The gap is invisible: every file looks correct in isolation and every test passes. The user discovers the bug on first real startup.
+
+---
+
 ### 2. Execute Tasks in Order
 
 For EACH task in "Step by Step Tasks":
@@ -216,6 +242,9 @@ Example (TypeScript):
    - Confirm with user: "Plan doesn't specify tests. Should I add tests for [implemented features]?"
    - Wait for user response before proceeding
 
+4. **Do not mock away required user setup:**
+   When a test fixture injects an env var that a user is supposed to supply (e.g., `os.environ["API_KEY"] = "test-key"`), this is fine for unit tests — but you must also ensure at least one validation command exercises the real loading path. Specifically: if an env-loading library (`python-dotenv`, `dotenv`, etc.) is in the plan or requirements, confirm that `load_dotenv()` (or equivalent) is called in the app entry point — not just that the library is installed. Search for the call site; if it is missing, add it before proceeding.
+
 **DO NOT skip to validation without addressing test requirements.**
 
 ### 2.8. MANDATORY: Pre-Validation User Action Check
@@ -243,6 +272,11 @@ Example (TypeScript):
    - CLI tools
    - Database setup
 
+5. **Env-loading wiring** — when `python-dotenv`, `dotenv`, or any config-loading library appears in requirements or the plan:
+   - Search the codebase for the actual `load_dotenv()` call (or equivalent)
+   - Verify it is in the app entry point (`main.py`, `app.py`, etc.) — not just in `requirements.txt` or `pyproject.toml`
+   - If the call is missing: add it before running validation
+
 **If ANY blocking user actions are required:**
 
 1. **STOP execution** - Do NOT run validation commands yet
@@ -268,6 +302,9 @@ Example (TypeScript):
 4. **WAIT for user confirmation** - Do NOT proceed until user responds
 
 5. **After user confirms** - Continue to Step 3 (Run Validation Commands)
+
+**If you did NOT block on manual prerequisites at Step 1.5** (missed them during planning):
+- This is the same situation — STOP now, enumerate all uncompleted steps, ask the user to complete them, and wait before running validation.
 
 **If NO blocking user actions found:**
 - Proceed directly to Step 3
@@ -415,6 +452,16 @@ Use TeamCreate tool:
 - team_name: "execute-{plan-name}"
 - description: "Executing {plan-name} with parallel agents"
 
+### 1.5. MANDATORY: Enumerate Manual Prerequisites Before Creating Tasks
+
+Same rule as in Sequential Execution — scan the plan for all manual prerequisites before spawning any teammates or writing any code.
+
+**Runtime-critical prerequisites** (secrets, `.env` files, credentials, migrations): ask the user to complete them now and wait for confirmation before proceeding.
+
+Reason: spawned agents that start without real config will write tests that mock-inject env vars, masking wiring bugs that only appear at real startup.
+
+---
+
 ### 2. Task Breakdown & Assignment
 
 #### a. Create Tasks from Plan
@@ -507,6 +554,11 @@ Status: ✅ All tests passing
    - CLI tools
    - Database setup
 
+5. **Env-loading wiring** — when `python-dotenv`, `dotenv`, or any config-loading library appears in requirements or the plan:
+   - Search the codebase for the actual `load_dotenv()` call (or equivalent)
+   - Verify it is in the app entry point (`main.py`, `app.py`, etc.) — not just in `requirements.txt` or `pyproject.toml`
+   - If the call is missing: add it before running validation
+
 **If ANY blocking user actions are required:**
 
 1. **STOP execution** - Do NOT run validation commands yet
@@ -532,6 +584,9 @@ Status: ✅ All tests passing
 4. **WAIT for user confirmation** - Do NOT proceed until user responds
 
 5. **After user confirms** - Continue to Step 5 (Run Validation Commands)
+
+**If you did NOT block on manual prerequisites at Step 1.5** (missed them during planning):
+- This is the same situation — STOP now, enumerate all uncompleted steps, ask the user to complete them, and wait before running validation.
 
 **If NO blocking user actions found:**
 - Proceed directly to Step 5

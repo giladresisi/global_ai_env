@@ -19,16 +19,40 @@ This shows all uncommitted changes (modified, untracked, and staged files)
 ## Step 1.5: Secret / Credential Scan
 Before staging anything, scan the diff output from Step 1 for explicit secrets or credentials.
 
-Look for patterns such as:
-- API keys (e.g., `sk-...`, `AIza...`, `AKIA...`, `ghp_...`, `xoxb-...`)
-- Passwords or tokens assigned to variables (e.g., `password = "..."`, `token: "..."`, `secret = "..."`)
+**Two complementary checks — BOTH must pass:**
+
+### Check A: Value-pattern scan
+Look for values that look like secrets regardless of what field they are in:
+- API keys with known prefixes (e.g., `sk-...`, `AIza...`, `AKIA...`, `ghp_...`, `xoxb-...`)
 - Private keys or certificates (e.g., `-----BEGIN RSA PRIVATE KEY-----`)
 - Hard-coded connection strings with credentials (e.g., `postgresql://user:pass@host`)
-- Any high-entropy string (20+ chars) assigned to a variable named key, secret, token, password, credential, or similar
+- Any high-entropy string (20+ random chars) assigned to a variable named key, secret, token, password, credential, or similar
+
+### Check B: Field-name scan (catches low-entropy keys like `org-agentic-kb`)
+Scan for any non-placeholder value assigned to an authentication-related field name, regardless of the value's format or length. Flag any of these patterns:
+
+```
+"X-API-Key": "<anything that is not a placeholder>"
+"Authorization": "..."
+api_key: ...
+apiKey: ...
+token: ...
+password: ...
+secret: ...
+credential: ...
+```
+
+In JSON, YAML, .env, config files, or any headers block (e.g., MCP `mcp.json`, CI configs).
+
+**A value is safe (not flagged) only if it is clearly a placeholder:**
+- Wrapped in angle brackets: `<your-key-here>`
+- Prefixed with `PLACEHOLDER_`, `YOUR_`, `MY_`, `EXAMPLE_`
+- An empty string: `""`
+- A well-known dummy: `"changeme"`, `"test-key"` (flag these too — they suggest a real value is expected)
 
 **If any suspected secret is found:**
 1. DO NOT stage or commit anything.
-2. Alert the user with the exact file path, line number, and the suspicious value (mask the middle characters, e.g., `sk-ab...xyz`).
+2. Alert the user with the exact file path, line number, and the suspicious value (mask the middle characters, e.g., `org-ag...kb`).
 3. Ask the user to confirm whether it is a real secret and how to proceed before continuing.
 4. STOP — do not proceed to Step 2 until the user responds.
 
