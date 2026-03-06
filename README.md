@@ -10,6 +10,22 @@ The result: an agent that consistently produces implementation plans before touc
 
 ## Installation
 
+### Skills CLI (via [skills.sh](https://skills.sh))
+
+Install all skills:
+
+```bash
+npx skills add https://github.com/giladresisi/ai-dev-env
+```
+
+Install a specific skill:
+
+```bash
+npx skills add https://github.com/giladresisi/ai-dev-env --skill <skill-name>
+```
+
+See [skills.sh](https://skills.sh) for more details.
+
 ### Claude Code (via Plugin Marketplace)
 
 Register the marketplace, then install:
