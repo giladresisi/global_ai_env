@@ -1,5 +1,5 @@
 ---
-name: validation:validate
+name: validate
 description: Use when running comprehensive project validation including tests, type checking, linting, API connectivity checks, and server startup verification
 ---
 

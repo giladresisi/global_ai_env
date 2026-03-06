@@ -1,5 +1,5 @@
 ---
-name: core_piv_loop:execute
+name: execute
 description: Use when implementing a feature plan file, choosing between sequential and team-based parallel execution with mandatory validation gates
 ---
 
@@ -833,7 +833,7 @@ For each skill, check whether it is available in this system. If it is, spawn it
 
 ### Subagent 1 — Execution Report (always run if available)
 
-**Skill:** `ai-dev-env:execution-report`
+**Skill:** `execution-report`
 
 Pass this context to the subagent:
 
@@ -861,7 +861,7 @@ Use this to populate the "Test Results" and "Validation Results" sections of the
 
 ### Subagent 2 — Acceptance Criteria Validation (run if available)
 
-**Skill:** `ai-dev-env:acceptance-criteria-validate`
+**Skill:** `acceptance-criteria-validate`
 
 Pass the plan file path and the execution output summary as context. The skill will locate acceptance criteria in the plan (or in `acceptance_criteria.md`) and validate whether each was met. It will produce a ACCEPTED / REJECTED / NEEDS REVIEW verdict and surface any unmet criteria.
 
@@ -871,7 +871,7 @@ Pass the plan file path and the execution output summary as context. The skill w
 
 ### Subagent 3 — Code Review (run if available)
 
-**Skill:** `ai-dev-env:code-review`
+**Skill:** `code-review`
 
 Pass the list of files modified during this execution and the plan file path as context. The skill will perform a technical review of all changed files for bugs, security issues, and standards compliance.
 

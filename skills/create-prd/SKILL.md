@@ -75,7 +75,7 @@ Your preference?
 ### Conduct Research
 
 For each API requiring research:
-1. **Execute**: `/core_piv_loop:explore-api [API name]`
+1. **Execute**: `/explore-api [API name]`
 2. **Read**: `.agents/research/[api]-research.md`
 3. **Verify**: POC tests passed
 
@@ -808,7 +808,7 @@ Present to user:
 📊 Next Steps:
 1. Review PRD with stakeholders
 2. Refine unclear sections
-3. Begin planning (/core_piv_loop:plan-feature)
+3. Begin planning (/plan-feature)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

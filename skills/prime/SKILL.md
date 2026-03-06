@@ -1,5 +1,5 @@
 ---
-name: core_piv_loop:prime
+name: prime
 description: Use when loading project context and architecture overview before starting implementation work, with optional focus on a specific area
 ---
 
@@ -11,9 +11,9 @@ Build understanding of the codebase - either high-level overview or focused deep
 
 ## Usage
 
-- `/core_piv_loop:prime` - High-level overview (architecture, patterns, structure)
-- `/core_piv_loop:prime "authentication system"` - Deep-dive into specific area
-- `/core_piv_loop:prime "API endpoints"` - Focus on particular functionality
+- `/prime` - High-level overview (architecture, patterns, structure)
+- `/prime "authentication system"` - Deep-dive into specific area
+- `/prime "API endpoints"` - Focus on particular functionality
 
 ## Decision: Which Mode?
 

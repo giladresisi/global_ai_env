@@ -1,5 +1,5 @@
 ---
-name: core_piv_loop:explore-api
+name: explore-api
 description: Use when researching an unfamiliar external API before integration to verify feasibility, integration patterns, and limitations
 ---
 

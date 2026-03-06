@@ -1,5 +1,5 @@
 ---
-name: ai-dev-env:acceptance-criteria-validate
+name: acceptance-criteria-validate
 description: Use when an agent executing an implementation plan claims to have finished, to validate that all acceptance criteria were actually met. Locates acceptance criteria from the plan file, acceptance_criteria.md, or the request itself, then investigates the codebase and surfaces a pass/fail verdict per criterion.
 ---
 

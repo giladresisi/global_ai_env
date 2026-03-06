@@ -1,5 +1,5 @@
 ---
-name: validation:code-review-fix
+name: code-review-fix
 description: Use when fixing bugs found during a code review, processing each issue with explanation and test verification
 ---
 

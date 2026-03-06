@@ -1,5 +1,5 @@
 ---
-name: validation:execution-report
+name: execution-report
 description: Use when generating an implementation report after feature completion documenting what was done, divergences from plan, and test results
 ---
 

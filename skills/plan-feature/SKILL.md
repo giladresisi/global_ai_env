@@ -1,5 +1,5 @@
 ---
-name: core_piv_loop:plan-feature
+name: plan-feature
 description: Use when creating a comprehensive implementation plan for a new feature including codebase analysis, API research, and parallel execution strategy
 ---
 
@@ -11,7 +11,7 @@ description: Use when creating a comprehensive implementation plan for a new fea
 
 After the plan is created:
 1. Show the user where the plan was saved
-2. Tell them to run `/core_piv_loop:execute .agents/plans/[feature-name].md`
+2. Tell them to run `/execute .agents/plans/[feature-name].md`
 3. STOP
 
 **Execution agent rules** (include verbatim in every generated plan):
@@ -84,7 +84,7 @@ Default to existing patterns. Document any divergences. Design for parallel exec
 
 ### Phase 3: External Research
 
-**APIs** (if applicable): Run `/core_piv_loop:explore-api [name]` for each.
+**APIs** (if applicable): Run `/explore-api [name]` for each.
 Verify: features available, version compatible, rate limits sufficient, ToS permits use, auth accessible, no blockers.
 
 **Dependencies**: Test in isolated venv first. Check conflict tree with `pipdeptree`/`npm list`. Document compatible versions and known conflicts.
@@ -171,23 +171,23 @@ Output to CLI after saving the plan. **Do NOT include plan content in this messa
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🚀 /core_piv_loop:execute .agents/plans/[feature-name].md
+🚀 /execute .agents/plans/[feature-name].md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ## Phase 7: Define Acceptance Criteria
 
-After the Final Report has been output above (giving the user a chance to see the plan), invoke the `ai-dev-env:acceptance-criteria-define` skill if it is available in this system:
+After the Final Report has been output above (giving the user a chance to see the plan), invoke the `acceptance-criteria-define` skill if it is available in this system:
 
 ```
-skill: "ai-dev-env:acceptance-criteria-define"
+skill: "acceptance-criteria-define"
 context: "<absolute path to the plan file just created>"
 ```
 
 Pass the plan file path as the context. The skill will read the plan, derive proposed acceptance criteria, confirm them with the user, and write the agreed criteria into the plan file.
 
-**If the `ai-dev-env:acceptance-criteria-define` skill is not available:** skip this phase and proceed directly to STOP below.
+**If the `acceptance-criteria-define` skill is not available:** skip this phase and proceed directly to STOP below.
 
 **Do NOT execute the plan after this phase completes.**
 

@@ -1,5 +1,5 @@
 ---
-name: ai-dev-env:acceptance-criteria-define
+name: acceptance-criteria-define
 description: Use when an agent is asked to define, review, or write acceptance criteria for a request or plan. Derives acceptance criteria from the current request context, confirms them with the user, and writes them into the plan file or a standalone acceptance_criteria.md file.
 ---
 
@@ -208,7 +208,7 @@ Acceptance criteria saved.
 
 File: <path>
 Criteria: <N> items
-Next step: Run /ai-dev-env:execute <plan-file> to implement, or share the criteria with the agent executing this work.
+Next step: Run /execute <plan-file> to implement, or share the criteria with the agent executing this work.
 ```
 
 If this skill was invoked as part of a planning or execution flow, return control to the calling skill now.

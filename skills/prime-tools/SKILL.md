@@ -1,5 +1,5 @@
 ---
-name: core_piv_loop:prime-tools
+name: prime-tools
 description: Use when about to build or modify agent tools and needing to load tool docstring patterns and best practices first
 ---
 

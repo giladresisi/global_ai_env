@@ -1,5 +1,5 @@
 ---
-name: validation:code-review
+name: code-review
 description: Use when performing a technical pre-commit code review on recently changed files for bugs, security issues, and standards compliance
 ---
 
