@@ -1,6 +1,6 @@
 # ai-dev-env
 
-A collection of Claude Code skills for software development workflows — planning, execution, code review, API research, git, and validation.
+A collection of Claude Code skills for software development workflows — planning, acceptance criteria, execution, code review, research & priming, GitHub bug fixes, git, and validation & reporting.
 
 ## What it is
 
@@ -69,7 +69,7 @@ Start a new session and ask your agent to plan a feature or commit changes. It s
 | `code-review` | Performing a technical pre-commit code review on recently changed files for bugs, security issues, and standards compliance |
 | `code-review-fix` | Fixing bugs found during a code review, processing each issue with explanation and test verification |
 
-### API Research
+### Research & Priming
 
 | Skill | When it activates |
 |-------|-------------------|
