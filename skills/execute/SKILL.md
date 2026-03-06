@@ -823,19 +823,21 @@ After execution completes and all validations pass, provide summary:
 
 ---
 
-## Invoke Execution Report
+## Invoke Post-Execution Skills
 
-After generating the Output Report above, **ALWAYS** invoke the execution-report skill using the `Skill` tool:
+After generating the Output Report above, launch the following skills as **parallel subagents** using the Agent tool. Start all available skills simultaneously — do NOT wait for one to finish before starting the others.
 
-```
-skill: "ai-dev-env:execution-report"
-```
-
-Pass the following context when invoking it:
+For each skill, check whether it is available in this system. If it is, spawn it as an Agent subagent. If it is not available, skip it silently.
 
 ---
 
-**Coverage gap context — include this when calling execution-report:**
+### Subagent 1 — Execution Report (always run if available)
+
+**Skill:** `ai-dev-env:execution-report`
+
+Pass this context to the subagent:
+
+**Coverage gap context — required for execution-report:**
 
 Compare planned test coverage (from the plan file) against what was actually executed:
 
@@ -857,4 +859,22 @@ Use this to populate the "Test Results" and "Validation Results" sections of the
 
 ---
 
-**Note:** The execution-report skill is installed via the marketplace. Do NOT use a bash file-existence check — just invoke the Skill tool directly.
+### Subagent 2 — Acceptance Criteria Validation (run if available)
+
+**Skill:** `ai-dev-env:acceptance-criteria-validate`
+
+Pass the plan file path and the execution output summary as context. The skill will locate acceptance criteria in the plan (or in `acceptance_criteria.md`) and validate whether each was met. It will produce a ACCEPTED / REJECTED / NEEDS REVIEW verdict and surface any unmet criteria.
+
+**If this skill produces a REJECTED or NEEDS REVIEW verdict:** surface its output prominently to the user before declaring execution complete. Do not silently discard a failing validation result.
+
+---
+
+### Subagent 3 — Code Review (run if available)
+
+**Skill:** `ai-dev-env:code-review`
+
+Pass the list of files modified during this execution and the plan file path as context. The skill will perform a technical review of all changed files for bugs, security issues, and standards compliance.
+
+---
+
+**Note:** These skills are installed via the marketplace. Do NOT use a bash file-existence check — just attempt to invoke each via the Agent tool and it will fail gracefully if the skill is not installed.

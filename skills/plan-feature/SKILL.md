@@ -176,4 +176,21 @@ Output to CLI after saving the plan. **Do NOT include plan content in this messa
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+## Phase 7: Define Acceptance Criteria
+
+After the Final Report has been output above (giving the user a chance to see the plan), invoke the `ai-dev-env:acceptance-criteria-define` skill if it is available in this system:
+
+```
+skill: "ai-dev-env:acceptance-criteria-define"
+context: "<absolute path to the plan file just created>"
+```
+
+Pass the plan file path as the context. The skill will read the plan, derive proposed acceptance criteria, confirm them with the user, and write the agreed criteria into the plan file.
+
+**If the `ai-dev-env:acceptance-criteria-define` skill is not available:** skip this phase and proceed directly to STOP below.
+
+**Do NOT execute the plan after this phase completes.**
+
+---
+
 **STOP — DO NOT EXECUTE**
