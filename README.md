@@ -32,11 +32,18 @@ Start a new session and ask your agent to plan a feature or commit changes. It s
 | `create-prd` | Creating a Product Requirements Document (PRD.md) from a conversation or feature request |
 | `plan-feature` | Creating a comprehensive implementation plan including codebase analysis and parallel execution strategy, used best for implementing a single feature / phase from a PRD |
 
+### Acceptance Criteria
+
+| Skill | When it activates |
+|-------|-------------------|
+| `acceptance-criteria-define` | Defining, reviewing, or writing acceptance criteria for a request or plan — derives proposed criteria, confirms with the user, and writes them to the plan file or `acceptance_criteria.md` |
+| `acceptance-criteria-validate` | Validating that all acceptance criteria were met after execution — produces a per-criterion PASS/FAIL/PARTIAL verdict and an overall ACCEPTED / REJECTED / NEEDS REVIEW verdict |
+
 ### Execution
 
 | Skill | When it activates |
 |-------|-------------------|
-| `execute` | Implementing a feature plan file, choosing between sequential and team-based parallel execution with mandatory validation gates; automatically calls `execution-report` on completion to surface coverage gaps |
+| `execute` | Implementing a feature plan file, choosing between sequential and team-based parallel execution with mandatory validation gates |
 | `init-project` | Setting up or reinitializing a project locally for the first time |
 
 ### Code Review & Quality
@@ -74,8 +81,33 @@ Start a new session and ask your agent to plan a feature or commit changes. It s
 |-------|-------------------|
 | `validate` | Running comprehensive project validation including tests, type checking, linting, and server startup |
 | `cleanup-progress` | Cleaning up PROGRESS.md after feature completion, replacing verbose notes with a concise summary |
-| `execution-report` | Generating an implementation report after feature completion, including a coverage gap analysis comparing what was planned vs what was actually tested; called automatically by `execute` |
+| `execution-report` | Generating an implementation report after feature completion, including a coverage gap analysis comparing what was planned vs what was actually tested |
 | `system-review` | Performing a meta-level analysis of plan adherence to identify process improvements |
+
+## Skill Interactions
+
+Skills call each other automatically. The diagram below shows which skill invokes which.
+
+```
+create-prd
+  └─ explore-api          (for each external API that needs research)
+
+plan-feature
+  ├─ explore-api          (Phase 3 — for each external API that needs research)
+  └─ acceptance-criteria-define   (Phase 7 — after plan is written, to define AC before execution starts)
+
+execute
+  ├─ acceptance-criteria-define   (Step 0 — if no acceptance criteria are found in the plan,
+  │                                acceptance_criteria.md, or the request; delegates to this
+  │                                skill if available, otherwise falls back to inline flow)
+  │
+  └─ [post-execution, run in parallel as subagents]
+       ├─ execution-report         (always — documents what was done, divergences, and coverage gaps)
+       ├─ acceptance-criteria-validate  (validates each criterion from the plan against the implementation)
+       └─ code-review              (technical review of all changed files for bugs and standards compliance)
+```
+
+All post-execution subagents (`execution-report`, `acceptance-criteria-validate`, `code-review`) are launched in parallel after the Output Report is generated. Each is skipped silently if not installed.
 
 ## Philosophy
 
