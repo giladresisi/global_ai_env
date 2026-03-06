@@ -25,6 +25,112 @@ Validation steps use MANDATORY, BLOCKING, and CRITICAL language to indicate enfo
 
 ---
 
+## Step 0: Acceptance Criteria Gate
+
+**MANDATORY — runs before anything else, including execution mode selection.**
+
+This gate ensures every execution run has explicit, user-confirmed acceptance criteria before a single line of code is written.
+
+### 0.1. Locate Acceptance Criteria
+
+Work through the following sources in order, stopping as soon as criteria are found.
+
+**Source 1 — Plan file** (when executing a pre-made plan):
+- Read the plan file
+- Search for any of these headings (case-insensitive): `## ACCEPTANCE CRITERIA`, `## Acceptance Criteria`, `## Success Criteria`, `## Completion Criteria`, `## Done When`
+- Also scan `## COMPLETION CHECKLIST` — individual checklist items there may serve as criteria
+- If found → **criteria located, skip to Step 0.3**
+
+**Source 2 — `acceptance_criteria.md`** (supplementary):
+- Check `.agents/acceptance_criteria.md` and `acceptance_criteria.md` in the project root
+- Look for a section that matches the current feature by name or date
+- If found → **criteria located, skip to Step 0.3**
+
+**Source 3 — The request itself**:
+- Re-read the user message or the context passed to this skill
+- Look for explicit success conditions: numbered/bulleted requirements, "done when", "I expect", "it should", "must", acceptance/success criteria stated inline
+- If found → **criteria located, skip to Step 0.3**
+
+**If all three sources yield nothing → proceed to Step 0.2.**
+
+---
+
+### 0.2. No Criteria Found — Stop and Resolve
+
+**STOP. Do NOT proceed to execution mode selection.**
+
+Output this message verbatim (filling in the bracketed parts):
+
+```
+⚠️ No acceptance criteria found
+
+I could not find acceptance criteria for this execution request in:
+- The plan file (if provided): [plan file path or "N/A"]
+- acceptance_criteria.md
+- The request itself
+
+Before I start implementing, we need to agree on what "done" looks like.
+
+Here are my suggested acceptance criteria based on my understanding of the request/plan:
+
+## Suggested Acceptance Criteria
+
+### Functional
+- [ ] <criterion>
+- [ ] <criterion>
+
+### Error Handling
+- [ ] <criterion>
+
+### Validation
+- [ ] <criterion> — verified by: `<command>`
+
+### Out of Scope
+- <item> — not required for this task
+```
+
+Then use **AskUserQuestion** to ask:
+
+**Question:** "How would you like to proceed?"
+
+**Options:**
+1. **Approve** — use the suggested criteria as-is and start execution
+2. **Revise** — I'll describe changes and you'll update them before starting
+3. **Define from scratch** — I'll write my own criteria; start execution once confirmed
+4. **Abort** — cancel this execution run
+
+**Wait for the user's response. Do NOT proceed until one of the four options is chosen.**
+
+**Handling each response:**
+
+- **Option 1 (Approve):** Use the suggested criteria verbatim. Proceed to Step 0.3.
+- **Option 2 (Revise):** Read the user's modifications. Merge them with the suggested criteria (add, update, or remove items as directed). Show the merged result to the user and confirm. Proceed to Step 0.3.
+- **Option 3 (Define from scratch):** Wait for the user to supply their own criteria. Use exactly what they provide — do not augment. Proceed to Step 0.3.
+- **Option 4 (Abort):** Output "Execution aborted." and **STOP. Do not execute anything.**
+
+---
+
+### 0.3. Write the Criteria
+
+**If a plan file exists** (this skill was invoked with a plan file path):
+- Open the plan file
+- Find the `## ACCEPTANCE CRITERIA` section if it exists, or append one before `## COMPLETION CHECKLIST` (or at the very end if that section is absent)
+- Write or overwrite the section with the final agreed criteria using `- [ ]` checkboxes
+- Use the Edit tool to make this change
+- Output: "Acceptance criteria written to `<plan-file-path>`."
+
+**If no plan file** (ad-hoc request):
+- Print the final agreed criteria to the console so they are visible in the conversation
+- Output: "Acceptance criteria confirmed (no plan file — criteria recorded above)."
+
+---
+
+### 0.4. Continue
+
+Proceed to the Execution Mode Decision Protocol below.
+
+---
+
 ## Execution Mode Decision Protocol
 
 **REQUIRED:** Before executing, analyze the plan and explicitly state your execution mode decision.
