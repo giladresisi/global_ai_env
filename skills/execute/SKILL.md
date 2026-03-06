@@ -59,6 +59,23 @@ Work through the following sources in order, stopping as soon as criteria are fo
 
 **STOP. Do NOT proceed to execution mode selection.**
 
+#### Option A: Delegate to `acceptance-criteria-define` skill (preferred)
+
+If the `acceptance-criteria-define` skill is available in this system, invoke it now via the Skill tool:
+
+```
+skill: "acceptance-criteria-define"
+context: "<plan file path, or a summary of the execution request if no plan file>"
+```
+
+Pass the plan file path (if one exists) or a concise description of what is being implemented as context. The skill will derive suggested criteria, confirm them with the user, and write them to the plan file or `acceptance_criteria.md`.
+
+**After the skill completes:** the criteria are now written. Proceed to Step 0.4 (skip Step 0.3 — the skill has already handled writing).
+
+---
+
+#### Option B: Inline fallback (only if `acceptance-criteria-define` is not available)
+
 Output this message verbatim (filling in the bracketed parts):
 
 ```
