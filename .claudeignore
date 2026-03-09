@@ -1,0 +1,13 @@
+.git/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+node_modules/
+__pycache__/
+.venv/
+dist/
+build/
+*.pyc

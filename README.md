@@ -125,6 +125,10 @@ execute
 
 All post-execution subagents (`execution-report`, `acceptance-criteria-validate`, `code-review`) are launched in parallel after the Output Report is generated. Each is skipped silently if not installed.
 
+## Workflow Diagram
+
+See the [full workflow diagram](docs/workflow-ascii.md) showing how skills connect and which trigger automatically in my workflow for building a new feature.
+
 ## Philosophy
 
 - **Plan before code** — Implementation plans are mandatory, not optional
