@@ -264,6 +264,34 @@ For simple plans (1-3 independent tasks, no parallel execution strategy):
 - Note the validation commands to run
 - Review the testing strategy
 
+### 1.25. MANDATORY: Baseline Test Run
+
+**REQUIRED BEFORE ANY CODE CHANGES:**
+
+Run the full test suite once on the unmodified codebase and record the results:
+
+1. Run: `[project test command]` (e.g., `uv run pytest tests/ -v` or `npm test`)
+2. Record: N passing, N failing, N skipped
+3. Note the names of any failing tests — these are **pre-existing failures**
+
+**Document your baseline in your working notes:**
+```
+Pre-implementation baseline: X/Y passing.
+Pre-existing failures (not introduced by this work):
+  - test_foo_bar — [reason if known]
+  - test_baz_qux — [reason if known]
+```
+
+**Why this runs before implementation, not after:**
+Without a baseline, you cannot tell whether a failing test at validation time is something
+you broke or something that was already broken. Pre-existing failures must be excluded from
+the "all tests pass" acceptance criterion — but only if documented before you started.
+If you discover failures mid-execution, you cannot retroactively claim they are pre-existing.
+
+**If pre-existing failures are found:**
+- For trivial fixes (≤30 min, clearly unrelated to your feature): fix them now before proceeding
+- For non-trivial pre-existing issues: note them explicitly and exclude them from your acceptance criteria scope
+
 ### 1.5. MANDATORY: Enumerate Manual Prerequisites Before Writing Code
 
 **REQUIRED IMMEDIATELY AFTER READING THE PLAN — before touching any files:**
@@ -574,6 +602,10 @@ For complex plans (4+ tasks, parallel opportunities, or explicit parallel strate
 Use TeamCreate tool:
 - team_name: "execute-{plan-name}"
 - description: "Executing {plan-name} with parallel agents"
+
+### 1.25. MANDATORY: Baseline Test Run
+
+Same rule as in Sequential Execution — run the full test suite once on the unmodified codebase before spawning any agent or writing any code. Record N passing / N failing and note any pre-existing failures so agents are not held responsible for them during validation.
 
 ### 1.5. MANDATORY: Enumerate Manual Prerequisites Before Creating Tasks
 

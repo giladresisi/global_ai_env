@@ -174,15 +174,21 @@ Format the report as follows:
 
 ## Step 4: Write or Display the Report
 
+**If invoked as a background subagent** (spawned via the Agent tool from another skill, e.g., from the `execute` skill's post-execution flow):
+- Always write the report to `.agents/acceptance-validations/<feature-name>-validation.md`
+- Derive `<feature-name>` from the plan file name or the request title
+- Return a concise summary to the caller: file path + overall verdict + list of any FAILs or PARTIALs
+- This ensures the orchestrating agent can read the full results even if it cannot see subagent output directly
+
 **If the caller requested output to a file** (e.g., "save the validation report", "write to a file"):
 - Write the report to `.agents/acceptance-validations/<feature-name>-validation.md`
 - Derive `<feature-name>` from the plan file name or the request title
 - Output to the user: "Validation report written to `.agents/acceptance-validations/<feature-name>-validation.md`."
 
-**If the caller requested output to the CLI** (default when no file destination is specified):
+**If the caller requested output to the CLI** (default when invoked interactively with no file destination specified):
 - Output the full report directly to the conversation
 
-**In both cases**, end with one of these verdicts printed prominently:
+**In all cases**, end with one of these verdicts printed prominently:
 
 ```
 Overall: ACCEPTED   — all acceptance criteria met, ready for commit/review

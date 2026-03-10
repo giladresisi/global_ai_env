@@ -20,10 +20,9 @@ Start by gathering codebase context to understand the codebase standards and pat
 
 Start by examining:
 
-- CLAUDE.md
+- CLAUDE.md (project-specific, usually at project root or `.claude/CLAUDE.md`) and `~/.claude/CLAUDE.md` (global user standards)
 - README.md
-- Key files in the /core module
-- Documented standards in the /docs directory
+- Standards documentation: look for `/docs`, `/core`, or any dedicated standards directories — not all projects use this convention; the primary source is always CLAUDE.md
 
 After you have a good understanding
 
@@ -80,6 +79,13 @@ For each changed file or new file, analyze for:
 - Run specific tests for issues found
 - Confirm type errors are legitimate
 - Validate security concerns with context
+
+**Before reporting test failures as issues:**
+Determine whether the failure is pre-existing (existed before this changeset) by:
+1. Checking for an execution report at `.agents/execution-reports/` — it will note pre-existing failures if the executor ran a baseline test
+2. Running `git stash && <test command> && git stash pop` if no execution report exists
+
+Do not report pre-existing test failures as issues introduced by the current changeset. Mark them separately as "Pre-existing Failures" with a brief root cause note.
 
 ## Output Format
 
