@@ -34,17 +34,15 @@ Read this to find all notes for the current feature including:
 - Execution phase notes
 - Execution report (what was actually done and why)
 
-**Plan Command:**
-Read this to understand the planning process and what instructions guide plan creation.
-.claude/commands/plan-feature.md
-
 **Generated Plan:**
 Read this to understand what the agent was SUPPOSED to do.
 Look up plan file location from PROGRESS.md
 
-**Execute Command:**
-Read this to understand the execution process and what instructions guide implementation.
-.claude/commands/execute.md
+**Execution Report & Code Review:**
+Read `.agents/execution-reports/` and `.agents/code-reviews/` for this feature if they exist — they document divergences, challenges, and issues found post-execution.
+
+**Skills used in the session:**
+Identify which `ai-dev-env:*` skills were invoked (from PROGRESS.md, session summary, or conversation context). These are the skills you will inspect and improve in Step 6.
 
 ## Analysis Workflow
 
@@ -278,9 +276,104 @@ Based on patterns discovered during this implementation, add these sections:
 
 **Do NOT include the full review content in PROGRESS.md - only the reference.**
 
+## Step 6: Auto-Update Used Skills via Worktree + PR
+
+After completing the system review document (Steps 1–5 and Output Format), inspect and update the SKILL.md files for every skill that was invoked in this session. Changes go through a worktree + pull request — never directly into `~/.claude/`.
+
+### 6.1 Identify Skills Used
+
+Scan the following sources to build the list of invoked skills:
+- PROGRESS.md "Reports Generated" or "Skill Improvements Applied" sections
+- The session summary or conversation context — look for `ai-dev-env:*` skill invocations
+- The system review document you just wrote — the "Skills invoked" line in Meta Information
+
+**Skills to look for (any that were used):**
+`execute`, `acceptance-criteria-validate`, `acceptance-criteria-define`, `code-review`, `code-review-fix`, `plan-feature`, `execution-report`, `system-review`
+
+### 6.2 Locate the ai-dev-env Source Repo
+
+The canonical source repo is at `~/projects/ai-dev-env`. Verify it exists:
+```bash
+ls ~/projects/ai-dev-env/skills/
+```
+
+If it doesn't exist, the repo may need to be cloned first. The remote is visible in the cached copy:
+```bash
+cd ~/.claude/plugins/cache/ai-dev-env-marketplace/ai-dev-env/1.0.0 && git remote -v
+```
+
+**Never edit files under `~/.claude/plugins/` directly** — that is an installed cache. Changes there are not tracked in the source repo and will be overwritten on next plugin update.
+
+### 6.3 Create a Worktree
+
+```bash
+cd ~/projects/ai-dev-env
+git worktree add ../ai-dev-env-skill-improvements -b improve-skills-from-<feature-name>
+```
+
+Replace `<feature-name>` with the slug of the feature just reviewed (e.g., `extractive-summarization`).
+
+### 6.4 Identify Skill-Specific Improvements
+
+For each skill, review the divergence analysis, code review findings, and challenges from this session and ask: **"What instruction was missing from this skill that would have prevented this issue?"**
+
+Apply improvements in these priority tiers:
+
+**Tier 1 — Missing mandatory step:** A process step that should have been enforced but wasn't. Add it explicitly with MANDATORY language.
+
+**Tier 2 — Ambiguous instruction:** An instruction that led to two valid interpretations, one of which caused a problem. Clarify it.
+
+**Tier 3 — Missing context:** The skill lacked awareness of project conventions it needed. Update the instruction to be more flexible or explicit.
+
+**Do NOT apply:**
+- Improvements specific to this one project that wouldn't generalize
+- Changes that make a skill more rigid when current flexibility is intentional
+- Rewrites of sections that worked correctly
+
+### 6.5 Apply Changes in the Worktree
+
+For each improvement identified:
+1. Read the target SKILL.md in the worktree fully before editing
+2. Use the **Edit tool** to apply targeted changes — never rewrite the whole file
+3. Keep each change focused: one issue → one edit
+
+### 6.6 Verify, Commit, Push, and Open PR
+
+```bash
+cd ~/projects/ai-dev-env-skill-improvements
+git diff --stat   # verify only intended lines changed
+
+git add skills/<skill-name>/SKILL.md ...
+git commit -m "improve <skills>: <one-line summary of what changed and why>"
+
+git push -u origin improve-skills-from-<feature-name>
+
+gh pr create --title "Improve skills from <feature-name> session learnings" --body "..."
+```
+
+In the PR body, list each skill changed, what was changed, and the session evidence that motivated it.
+
+### 6.7 Document in PROGRESS.md
+
+After the PR is open, add a "Skill Improvements Applied" section to PROGRESS.md:
+
+```markdown
+### Skill Improvements Applied
+
+**PR:** <GitHub PR URL>
+**Branch:** `improve-skills-from-<feature-name>`
+
+| Skill | Change | Reason |
+|-------|--------|--------|
+| `execute` | ... | ... |
+```
+
+---
+
 ## Important
 
 - **Be specific:** Don't say "plan was unclear" - say "plan didn't specify which auth pattern to use"
 - **Focus on patterns:** One-off issues aren't actionable. Look for repeated problems.
 - **Action-oriented:** Every finding should have a concrete asset update suggestion
 - **Suggest improvements:** Don't just analyze - actually suggest the text to add to CLAUDE.md or commands
+- **For skill edits:** Always work in a worktree of `~/projects/ai-dev-env`, never in `~/.claude/plugins/`
