@@ -16,13 +16,13 @@ Perform a meta-level analysis of how well the implementation followed the plan a
 - Analyze plan adherence and divergence patterns
 - Identify which divergences were justified vs problematic
 - Surface process improvements that prevent future issues
-- Suggest updates to Layer 1 assets (CLAUDE.md, plan templates, commands)
+- Suggest updates to Layer 1 assets (CLAUDE.md, plan templates, skills)
 
 **Philosophy:**
 
 - Good divergence reveals plan limitations → improve planning
 - Bad divergence reveals unclear requirements → improve communication
-- Repeated issues reveal missing automation → create commands
+- Repeated issues reveal missing automation → create skills
 
 ## Context & Inputs
 
@@ -105,8 +105,8 @@ For each problematic divergence, identify the root cause:
 Based on patterns across divergences, suggest:
 
 - **CLAUDE.md updates:** Universal patterns or anti-patterns to document
-- **Plan command updates:** Instructions that need clarification or missing steps
-- **New commands:** Manual processes that should be automated
+- **Plan skill updates:** Instructions that need clarification or missing steps
+- **New skills:** Manual processes that should be automated
 - **Validation additions:** Checks that would catch issues earlier
 
 ## Output Format
@@ -183,17 +183,17 @@ impact: [describe impact]
   [Actual suggested text to add]
   ```
 
-### Update [command-name] command:
+### Update [skill-name] skill:
 
 - [ ] Add [specific instruction]:
   ```markdown
   [Actual suggested text to add]
   ```
 
-### Create New Command:
+### Create New Skill:
 
-- [ ] `/[command-name]` for [manual process]
-  - [Description of command purpose]
+- [ ] `[skill-name]` for [manual process]
+  - [Description of skill purpose]
 
 ## Key Learnings
 
@@ -306,12 +306,15 @@ cd ~/.claude/plugins/cache/ai-dev-env-marketplace/ai-dev-env/1.0.0 && git remote
 
 ### 6.3 Create a Worktree
 
-```bash
-cd ~/projects/ai-dev-env
-git worktree add ../ai-dev-env-skill-improvements -b improve-skills-from-<feature-name>
+Use the `ai-dev-env:create-worktree` skill with `origin/main` as the base branch so the worktree starts from the remote state, not any local divergence:
+
+```
+/create-worktree improve-skills-from-<feature-name> origin/main
 ```
 
 Replace `<feature-name>` with the slug of the feature just reviewed (e.g., `extractive-summarization`).
+
+The working directory for subsequent steps will be `../ai-dev-env-skill-improvements`.
 
 ### 6.4 Identify Skill-Specific Improvements
 
@@ -375,5 +378,5 @@ After the PR is open, add a "Skill Improvements Applied" section to PROGRESS.md:
 - **Be specific:** Don't say "plan was unclear" - say "plan didn't specify which auth pattern to use"
 - **Focus on patterns:** One-off issues aren't actionable. Look for repeated problems.
 - **Action-oriented:** Every finding should have a concrete asset update suggestion
-- **Suggest improvements:** Don't just analyze - actually suggest the text to add to CLAUDE.md or commands
+- **Suggest improvements:** Don't just analyze - actually suggest the text to add to CLAUDE.md or skills
 - **For skill edits:** Always work in a worktree of `~/projects/ai-dev-env`, never in `~/.claude/plugins/`

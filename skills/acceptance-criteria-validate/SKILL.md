@@ -101,6 +101,16 @@ For each criterion, investigate whether it has been met. Use a structured approa
 - If the plan's `## VALIDATION COMMANDS` section lists commands and it is safe to run them in the current environment, run them and use the results as evidence
 - Do not run commands that could have side effects (migrations, deployments, destructive ops) without confirmation
 
+**Deferred demo/script validation — MANDATORY structural probe:**
+When a demo script or CLI is marked UNVERIFIABLE or deferred due to environmental constraints (live server, external auth, human approval step), do NOT accept the deferral without running a structural probe:
+1. `python -c "import <module>"` — verifies no import/syntax errors
+2. Run the script up to its first blocking dependency (live server call, `input()`, etc.) — catches encoding errors, misconfigured subprocess invocations, and wiring bugs before the environmental gate
+3. Inspect any new subprocess invocations for inherited env-var hazards (especially `CLAUDECODE`, `PATH`, secret vars)
+Mark as PARTIAL (not UNVERIFIABLE) if these structural checks are skipped. "Covered at unit level" is only a valid deferral for library behavior, never for the executable surface of the deliverable.
+
+**Hardcoded HTTP endpoint URLs:**
+For any criterion involving HTTP calls introduced in the feature, verify at least one representative hardcoded URL against the live server's registered routes (e.g., `curl -I <url>` or check `main.py` router/mount registrations). A 404 on a newly introduced URL is a FAIL, not UNVERIFIABLE — incorrect URLs cause silent tool-call failures that are very hard to diagnose.
+
 ### Per-criterion verdict
 
 For each criterion, produce one of:

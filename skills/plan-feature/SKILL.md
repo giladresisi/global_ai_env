@@ -116,6 +116,13 @@ Run automatically after plan is written. No user input needed unless a gap can't
 4. **Fill gaps** — add automated test by default; if genuinely impossible to automate, add manual test with one-sentence justification ("requires physical hardware", "CAPTCHA blocks automation"). "Hard to automate" and "requires a browser" are NOT valid reasons — use Playwright.
 5. **Re-verify** — repeat until all paths are ✅ or documented manual-only. Update Test Automation Summary in plan.
 
+6. **Script deliverables check** — if the plan introduces or modifies a runnable script (demo runner, CLI, orchestrator), verify the plan includes ALL of the following criteria (distinct from scenario-logic criteria):
+   - "Running `<script>` completes the setup phase without raising an exception." (runnability — unit tests do not substitute for this)
+   - "All user-visible output uses ASCII-safe characters, or the script explicitly reconfigures stdout encoding at startup." (cross-platform compatibility)
+   - If the script spawns `claude` as a subprocess: "The subprocess environment strips `CLAUDECODE` (and any other launcher sentinels) before invoking claude." (env isolation)
+
+   These criteria test that the script *runs at all*, before any criteria about what it reports. A script can be entirely broken (encoding errors, misconfigured subprocesses) while every unit test passes — they are separate surfaces requiring separate validation.
+
 ---
 
 ## Post-Planning Verification
