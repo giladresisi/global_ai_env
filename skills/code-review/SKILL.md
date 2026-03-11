@@ -55,6 +55,7 @@ For each changed file or new file, analyze for:
    - XSS vulnerabilities
    - Insecure data handling
    - Exposed secrets or API keys
+   - **Hardcoded endpoint URLs** — any new `http://localhost:…` or `http://<host>:…` literal is a mandatory spot-check: verify the path matches the server's registered routes (check `main.py` mount/router registrations). Incorrect URLs cause silent tool-call failures; flag as **high** severity if unverified.
 
 3. **Performance Problems**
    - N+1 queries
