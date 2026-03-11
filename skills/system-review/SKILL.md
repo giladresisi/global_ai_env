@@ -306,12 +306,15 @@ cd ~/.claude/plugins/cache/ai-dev-env-marketplace/ai-dev-env/1.0.0 && git remote
 
 ### 6.3 Create a Worktree
 
-```bash
-cd ~/projects/ai-dev-env
-git worktree add ../ai-dev-env-skill-improvements -b improve-skills-from-<feature-name>
+Use the `ai-dev-env:create-worktree` skill with `origin/main` as the base branch so the worktree starts from the remote state, not any local divergence:
+
+```
+/create-worktree improve-skills-from-<feature-name> origin/main
 ```
 
 Replace `<feature-name>` with the slug of the feature just reviewed (e.g., `extractive-summarization`).
+
+The working directory for subsequent steps will be `../ai-dev-env-skill-improvements`.
 
 ### 6.4 Identify Skill-Specific Improvements
 
